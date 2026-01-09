@@ -1,0 +1,221 @@
+name: 'Deploy Starlight to GitHub Pages'
+description: 'Build and deploy Starlight documentation sites to GitHub Pages'
+author: 'Starlight GitHub Pages Action'
+
+branding:
+  icon: 'book-open'
+  color: 'purple'
+
+inputs:
+  site-title:
+    description: 'Title for the documentation site'
+    required: true
+  content-dir:
+    description: 'Directory containing documentation content'
+    required: false
+    default: 'docs'
+  site-description:
+    description: 'Description for SEO and metadata'
+    required: false
+    default: 'Documentation site built with Starlight'
+  base-path:
+    description: 'Base path for GitHub Pages deployment'
+    required: false
+    default: ''
+  favicon:
+    description: 'Path to custom favicon file'
+    required: false
+    default: ''
+  logo:
+    description: 'Path to custom logo file'
+    required: false
+    default: ''
+  starlight-version:
+    description: 'Starlight version to use (default: latest)'
+    required: false
+    default: 'latest'
+
+outputs:
+  site-url:
+    description: 'The deployed GitHub Pages URL'
+    value: ${{ steps.deploy.outputs.page_url }}
+  build-status:
+    description: 'Success/failure status of the build process'
+    value: ${{ steps.build.outputs.build-status }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: pnpm
+
+    - name: Build Starlight Site
+      id: build
+      shell: bash
+      env:
+        SITE_TITLE: ${{ inputs.site-title }}
+        CONTENT_DIR: ${{ inputs.content-dir }}
+        SITE_DESCRIPTION: ${{ inputs.site-description }}
+        BASE_PATH: ${{ inputs.base-path }}
+        FAVICON: ${{ inputs.favicon }}
+        LOGO: ${{ inputs.logo }}
+        STARLIGHT_VERSION: ${{ inputs.starlight-version }}
+        SITE_URL: ${{ github.server_url }}/${{ github.repository }}
+        GITHUB_URL: ${{ github.server_url }}/${{ github.repository }}
+        EDIT_BASE_URL: ${{ github.server_url }}/${{ github.repository }}/edit/${{ github.ref_name }}
+      run: |
+        set -e
+        
+        echo "🚀 Starting Starlight build process..."
+        
+        # Validate inputs
+        if [ -z "$SITE_TITLE" ]; then
+          echo "❌ Error: Site title is required"
+          exit 1
+        fi
+        
+        # Set defaults
+        CONTENT_DIR=${CONTENT_DIR:-"docs"}
+        SITE_DESCRIPTION=${SITE_DESCRIPTION:-"Documentation site built with Starlight"}
+        STARLIGHT_VERSION=${STARLIGHT_VERSION:-"latest"}
+        BUILD_DIR=".starlight-build"
+        
+        echo "🔍 Configuration:"
+        echo "   Site title: $SITE_TITLE"
+        echo "   Content directory: $CONTENT_DIR"
+        echo "   Starlight version: $STARLIGHT_VERSION"
+        
+        # Create fresh Starlight project
+        echo "📦 Creating new Starlight project..."
+        rm -rf "$BUILD_DIR"
+        
+        if [ "$STARLIGHT_VERSION" = "latest" ]; then
+          pnpm create starlight@latest "$BUILD_DIR" --template minimal --typescript false --no-install
+        else
+          pnpm create starlight@"$STARLIGHT_VERSION" "$BUILD_DIR" --template minimal --typescript false --no-install
+        fi
+        
+        cd "$BUILD_DIR"
+        echo "   ✓ Starlight project created"
+        
+        # Update astro.config.mjs with user inputs
+        echo "⚙️  Updating configuration..."
+        
+        # Check if user provided their own config
+        if [ -f "../$CONTENT_DIR/astro.config.mjs" ]; then
+          echo "   Using user-provided astro.config.mjs"
+          cp "../$CONTENT_DIR/astro.config.mjs" astro.config.mjs
+        else
+          echo "   Using default Starlight configuration"
+        fi
+        
+        # Update configuration with user inputs using sed
+        sed -i "s/title: '[^']*'/title: '$SITE_TITLE'/g" astro.config.mjs
+        sed -i "s/description: '[^']*'/description: '$SITE_DESCRIPTION'/g" astro.config.mjs
+        
+        # Add optional configurations
+        if [ -n "$BASE_PATH" ]; then
+          sed -i "/export default defineConfig/a\\  base: '$BASE_PATH'," astro.config.mjs
+        fi
+        
+        if [ -n "$SITE_URL" ]; then
+          sed -i "/export default defineConfig/a\\  site: '$SITE_URL'," astro.config.mjs
+        fi
+        
+        # Add GitHub social link if available and not already present
+        if [ -n "$GITHUB_URL" ] && ! grep -q "github:" astro.config.mjs; then
+          sed -i "/sidebar:/i\\      social: { github: '$GITHUB_URL' }," astro.config.mjs
+        fi
+        
+        # Add edit link if available and not already present
+        if [ -n "$EDIT_BASE_URL" ] && ! grep -q "editLink:" astro.config.mjs; then
+          sed -i "/sidebar:/i\\      editLink: { baseUrl: '$EDIT_BASE_URL' }," astro.config.mjs
+        fi
+        
+        echo "   ✓ Configuration updated"
+        
+        # Process user content
+        echo "📝 Processing user content..."
+        if [ -d "../$CONTENT_DIR" ]; then
+          echo "   Copying content from $CONTENT_DIR..."
+          
+          # Remove default content
+          rm -rf src/content/docs/*
+          
+          # Copy all markdown files
+          find "../$CONTENT_DIR" -name "*.md" -o -name "*.mdx" | while read -r file; do
+            rel_path=$(realpath --relative-to="../$CONTENT_DIR" "$file")
+            target_dir="src/content/docs/$(dirname "$rel_path")"
+            mkdir -p "$target_dir"
+            cp "$file" "$target_dir/"
+          done
+          
+          # Copy all assets to public directory
+          mkdir -p public/assets
+          find "../$CONTENT_DIR" -type f ! \( -name "*.md" -o -name "*.mdx" \) | while read -r file; do
+            rel_path=$(realpath --relative-to="../$CONTENT_DIR" "$file")
+            target_dir="public/assets/$(dirname "$rel_path")"
+            mkdir -p "$target_dir"
+            cp "$file" "$target_dir/"
+          done
+          
+          echo "   ✓ Content copied"
+        else
+          echo "   ⚠️  Content directory not found: $CONTENT_DIR, using default content"
+        fi
+        
+        # Copy logo and favicon if provided
+        if [ -n "$LOGO" ] && [ -f "../$LOGO" ]; then
+          mkdir -p src/assets
+          cp "../$LOGO" src/assets/
+          logo_filename=$(basename "$LOGO")
+          sed -i "/title: '$SITE_TITLE'/a\\      logo: { src: './src/assets/$logo_filename' }," astro.config.mjs
+          echo "   ✓ Logo copied: $LOGO"
+        fi
+        
+        if [ -n "$FAVICON" ] && [ -f "../$FAVICON" ]; then
+          cp "../$FAVICON" public/
+          favicon_filename=$(basename "$FAVICON")
+          sed -i "/title: '$SITE_TITLE'/a\\      favicon: '/$favicon_filename'," astro.config.mjs
+          echo "   ✓ Favicon copied: $FAVICON"
+        fi
+        
+        # Install dependencies and build
+        echo "📦 Installing dependencies..."
+        pnpm install
+        
+        echo "🔨 Building Starlight site..."
+        pnpm build
+        
+        # Validate build output
+        if [ ! -f "dist/index.html" ]; then
+          echo "❌ Error: Build failed - no index.html found"
+          exit 1
+        fi
+        
+        echo "✅ Build completed successfully!"
+        
+        # Set outputs
+        echo "build-dir=$BUILD_DIR" >> $GITHUB_OUTPUT
+        echo "output-dir=$BUILD_DIR/dist" >> $GITHUB_OUTPUT
+        echo "build-status=success" >> $GITHUB_OUTPUT
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload Pages Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: .starlight-build/dist
+
+    - name: Deploy to GitHub Pages
+      id: deploy
+      uses: actions/deploy-pages@v4

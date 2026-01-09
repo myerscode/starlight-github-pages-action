@@ -1,0 +1,44 @@
+name: Deploy Documentation (Basic)
+
+# This is a basic example workflow for deploying Starlight documentation
+# Copy this file to your repository's .github/workflows/ directory
+
+on:
+  # Trigger on pushes to main branch
+  push:
+    branches: [main]
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+# Required permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent concurrent deployments
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: myerscode/starlight-github-pages-action@v1
+        with:
+          # Required: Title for your documentation site
+          site-title: "My Project Documentation"
+          
+          # Optional: Directory containing your Markdown files (default: "docs")
+          content-dir: "docs"
