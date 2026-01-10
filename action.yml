@@ -49,13 +49,8 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 24
-
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 10
-        run_install: false
+        node-version: '23'
+        cache: 'npm'
 
     - name: Build Starlight Site
       id: build
@@ -98,9 +93,9 @@ runs:
         rm -rf "$BUILD_DIR"
         
         if [ "$STARLIGHT_VERSION" = "latest" ]; then
-          pnpm create starlight@latest "$BUILD_DIR" --template minimal --typescript false --no-install
+          npm create starlight@latest "$BUILD_DIR" -- --template minimal --typescript false --no-install
         else
-          pnpm create starlight@"$STARLIGHT_VERSION" "$BUILD_DIR" --template minimal --typescript false --no-install
+          npm create starlight@"$STARLIGHT_VERSION" "$BUILD_DIR" -- --template minimal --typescript false --no-install
         fi
         
         cd "$BUILD_DIR"
@@ -190,10 +185,10 @@ runs:
         
         # Install dependencies and build
         echo "📦 Installing dependencies..."
-        pnpm install
+        npm install
         
         echo "🔨 Building Starlight site..."
-        pnpm build
+        npm run build
         
         # Validate build output
         if [ ! -f "dist/index.html" ]; then
