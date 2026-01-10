@@ -92,9 +92,9 @@ runs:
         rm -rf "$BUILD_DIR"
         
         if [ "$STARLIGHT_VERSION" = "latest" ]; then
-          npm create starlight@latest "$BUILD_DIR" -- --template minimal --typescript false --no-install
+          npx create-starlight@latest "$BUILD_DIR" --template minimal --typescript false --no-install
         else
-          npm create starlight@"$STARLIGHT_VERSION" "$BUILD_DIR" -- --template minimal --typescript false --no-install
+          npx create-starlight@"$STARLIGHT_VERSION" "$BUILD_DIR" --template minimal --typescript false --no-install
         fi
         
         cd "$BUILD_DIR"
