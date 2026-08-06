@@ -19,7 +19,7 @@ inputs:
     required: false
     default: 'Documentation site built with Starlight'
   base-path:
-    description: 'Base path for GitHub Pages deployment'
+    description: 'Base path for GitHub Pages deployment (auto-detected if not set)'
     required: false
     default: ''
   favicon:
@@ -47,6 +47,10 @@ runs:
       with:
         node-version: '22'
 
+    - name: Setup Pages
+      id: pages
+      uses: actions/configure-pages@v6
+
     - name: Build Starlight Site
       id: build
       shell: bash
@@ -58,6 +62,8 @@ runs:
         FAVICON: ${{ inputs.favicon }}
         LOGO: ${{ inputs.logo }}
         GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
       run: |
         set -e
 
@@ -73,9 +79,16 @@ runs:
         SITE_DESCRIPTION="${SITE_DESCRIPTION:-Documentation site built with Starlight}"
         BUILD_DIR=".starlight-build"
 
+        # Use configure-pages output for base path if not explicitly set
+        if [ -z "$BASE_PATH" ]; then
+          BASE_PATH="$PAGES_BASE_PATH"
+        fi
+
         echo "🔍 Configuration:"
         echo "   Site title: $SITE_TITLE"
         echo "   Content directory: $CONTENT_DIR"
+        echo "   Base URL: $PAGES_BASE_URL"
+        echo "   Base path: $BASE_PATH"
 
         # Validate content directory exists
         if [ ! -d "$CONTENT_DIR" ]; then
@@ -162,15 +175,8 @@ runs:
         # Build astro config
         echo "⚙️  Generating Astro configuration..."
 
-        SITE_CONFIG=""
-        if [ -n "$GITHUB_REPO_URL" ]; then
-          SITE_CONFIG="site: '$GITHUB_REPO_URL',"
-        fi
-
-        BASE_CONFIG=""
-        if [ -n "$BASE_PATH" ]; then
-          BASE_CONFIG="base: '$BASE_PATH',"
-        fi
+        # Use Pages base URL for site, fall back to repo URL
+        SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
 
         SOCIAL_CONFIG=""
         if [ -n "$GITHUB_REPO_URL" ]; then
@@ -182,9 +188,8 @@ runs:
         import starlight from '@astrojs/starlight';
 
         export default defineConfig({
-          $SITE_CONFIG
-          $BASE_CONFIG
-          image: { service: { entrypoint: 'astro/assets/services/noop' } },
+          site: '$SITE_URL',
+          base: '$BASE_PATH',
           integrations: [
             starlight({
               title: '$SITE_TITLE',
@@ -215,9 +220,6 @@ runs:
 
         echo "✅ Build completed successfully!"
         echo "build-status=success" >> $GITHUB_OUTPUT
-
-    - name: Setup Pages
-      uses: actions/configure-pages@v6
 
     - name: Upload Pages Artifact
       uses: actions/upload-pages-artifact@v5
