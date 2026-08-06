@@ -117,7 +117,7 @@ runs:
 
         # Install dependencies
         echo "📦 Installing dependencies..."
-        npm install astro @astrojs/starlight sharp
+        npm install astro @astrojs/starlight
 
         # Copy user content into src/content/docs
         echo "📝 Processing content..."
@@ -184,6 +184,7 @@ runs:
         export default defineConfig({
           $SITE_CONFIG
           $BASE_CONFIG
+          image: { service: { entrypoint: 'astro/assets/services/noop' } },
           integrations: [
             starlight({
               title: '$SITE_TITLE',
