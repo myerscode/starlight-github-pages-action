@@ -1,8 +1,8 @@
-name: Deploy Documentation
+name: Test Action
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/action]
   workflow_dispatch:
 
 permissions:
@@ -21,10 +21,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: myerscode/starlight-github-pages-action@main
+      - name: Deploy to GitHub Pages
         id: deployment
+        uses: ./
         with:
-          site-title: "My Project Documentation"
+          site-title: "Starlight GitHub Pages Action"
+          site-description: "Documentation for the Starlight GitHub Pages Action"
           content-dir: "docs"
