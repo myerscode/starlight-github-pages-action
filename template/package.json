@@ -1,0 +1,8 @@
+{
+  "name": "starlight-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro build"
+  }
+}

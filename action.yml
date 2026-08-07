@@ -64,6 +64,7 @@ runs:
         GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
         PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        ACTION_PATH: ${{ github.action_path }}
       run: |
         set -e
 
@@ -96,35 +97,13 @@ runs:
           exit 1
         fi
 
-        # Create build directory structure
+        # Scaffold build directory from template
         rm -rf "$BUILD_DIR"
         mkdir -p "$BUILD_DIR/src/content/docs"
         mkdir -p "$BUILD_DIR/public"
 
-        # Create package.json
-        cat > "$BUILD_DIR/package.json" <<'PKGJSON'
-        {
-          "name": "starlight-docs",
-          "private": true,
-          "type": "module",
-          "scripts": {
-            "build": "astro build"
-          }
-        }
-        PKGJSON
-        sed -i 's/^        //' "$BUILD_DIR/package.json"
-
-        # Create content collection config (required by Astro Content Layer API)
-        cat > "$BUILD_DIR/src/content.config.ts" <<'CONTENTCFG'
-        import { defineCollection } from 'astro:content';
-        import { docsLoader } from '@astrojs/starlight/loaders';
-        import { docsSchema } from '@astrojs/starlight/schema';
-
-        export const collections = {
-          docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
-        };
-        CONTENTCFG
-        sed -i 's/^        //' "$BUILD_DIR/src/content.config.ts"
+        cp "$ACTION_PATH/template/package.json" "$BUILD_DIR/package.json"
+        cp "$ACTION_PATH/template/src/content.config.ts" "$BUILD_DIR/src/content.config.ts"
 
         cd "$BUILD_DIR"
 
@@ -172,10 +151,9 @@ runs:
           echo "   ✓ Favicon copied: $FAVICON"
         fi
 
-        # Build astro config
+        # Generate astro config (dynamic based on user inputs)
         echo "⚙️  Generating Astro configuration..."
 
-        # Use Pages base URL for site, fall back to repo URL
         SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
 
         SOCIAL_CONFIG=""
@@ -213,7 +191,6 @@ runs:
         # Validate build output
         if [ ! -f "dist/index.html" ]; then
           echo "❌ Error: Build failed - no index.html found in dist/"
-          echo "   Contents of dist/:"
           ls -la dist/ 2>/dev/null || echo "   dist/ directory does not exist"
           exit 1
         fi
