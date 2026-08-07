@@ -151,17 +151,22 @@ runs:
           echo "   ✓ Favicon copied: $FAVICON"
         fi
 
-        # Generate astro config (dynamic based on user inputs)
-        echo "⚙️  Generating Astro configuration..."
+        # Astro configuration
+        if [ -f "../astro.config.mjs" ]; then
+          echo "⚙️  Using astro.config.mjs from repository..."
+          cp "../astro.config.mjs" astro.config.mjs
+          echo "   ✓ User config copied"
+        else
+          echo "⚙️  Generating Astro configuration..."
 
-        SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
+          SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
 
-        SOCIAL_CONFIG=""
-        if [ -n "$GITHUB_REPO_URL" ]; then
-          SOCIAL_CONFIG="social: [{ label: 'GitHub', icon: 'github', href: '$GITHUB_REPO_URL' }],"
-        fi
+          SOCIAL_CONFIG=""
+          if [ -n "$GITHUB_REPO_URL" ]; then
+            SOCIAL_CONFIG="social: [{ label: 'GitHub', icon: 'github', href: '$GITHUB_REPO_URL' }],"
+          fi
 
-        cat > astro.config.mjs <<ASTROCFG
+          cat > astro.config.mjs <<ASTROCFG
         import { defineConfig } from 'astro/config';
         import starlight from '@astrojs/starlight';
 
@@ -179,9 +184,11 @@ runs:
           ],
         });
         ASTROCFG
-        sed -i 's/^        //' astro.config.mjs
+          sed -i 's/^        //' astro.config.mjs
 
-        echo "   ✓ Configuration generated"
+          echo "   ✓ Configuration generated"
+        fi
+
         cat astro.config.mjs
 
         # Build the site
