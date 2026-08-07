@@ -152,14 +152,18 @@ runs:
         fi
 
         # Astro configuration
+        SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
+
         if [ -f "../astro.config.mjs" ]; then
           echo "⚙️  Using astro.config.mjs from repository..."
           cp "../astro.config.mjs" astro.config.mjs
-          echo "   ✓ User config copied"
+
+          # Inject site and base into user config for correct asset paths
+          sed -i "s|defineConfig({|defineConfig({\n  site: '$SITE_URL',\n  base: '$BASE_PATH',|" astro.config.mjs
+
+          echo "   ✓ User config copied (site: $SITE_URL, base: $BASE_PATH)"
         else
           echo "⚙️  Generating Astro configuration..."
-
-          SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
 
           SOCIAL_CONFIG=""
           if [ -n "$GITHUB_REPO_URL" ]; then
