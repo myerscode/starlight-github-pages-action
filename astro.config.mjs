@@ -6,6 +6,7 @@ export default defineConfig({
     starlight({
       title: 'Starlight GitHub Pages Action',
       description: 'Zero-config Starlight documentation deployment to GitHub Pages',
+      favicon: '/assets/favicon.svg',
       social: [{ label: 'GitHub', icon: 'github', href: 'https://github.com/myerscode/starlight-github-pages-action' }],
       sidebar: [
         { label: 'Getting Started', slug: '' },
