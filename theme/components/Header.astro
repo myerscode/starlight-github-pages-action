@@ -10,8 +10,8 @@ const base = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 <div class="flex w-full items-center justify-between gap-6 px-2">
   <!-- Brand -->
   <a href={siteTitleHref || "/"} class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900 no-underline dark:text-white">
-    <img src={`${base}assets/logo-dark.svg`} alt="" class="h-7 w-7 dark:hidden" onerror="this.style.display='none'" />
-    <img src={`${base}assets/logo-light.svg`} alt="" class="hidden h-7 w-7 dark:block" onerror="this.style.display='none'" />
+    <img src={`${base}logo-dark.svg`} alt="" class="h-7 w-7 dark:hidden" onerror="this.style.display='none'" />
+    <img src={`${base}logo-light.svg`} alt="" class="hidden h-7 w-7 dark:block" onerror="this.style.display='none'" />
     <span>{siteTitle}</span>
   </a>
 
