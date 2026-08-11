@@ -4,7 +4,7 @@ import SocialIcons from "virtual:starlight/components/SocialIcons";
 import ThemeSelect from "./ThemeSelect.astro";
 
 const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
-const base = import.meta.env.BASE_URL || '/';
+const base = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 ---
 
 <div class="flex w-full items-center justify-between gap-6 px-2">
