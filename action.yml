@@ -196,6 +196,14 @@ runs:
           logo_filename=$(basename "$LOGO")
           LOGO_CONFIG="logo: { src: './src/assets/$logo_filename' },"
           echo "   ✓ Logo copied: $LOGO"
+        else
+          # Auto-detect logos in content directory and copy to public root
+          for name in logo-dark.svg logo-light.svg logo.svg; do
+            if [ -f "../$CONTENT_DIR/$name" ]; then
+              cp "../$CONTENT_DIR/$name" public/
+              echo "   ✓ Logo auto-detected: $name"
+            fi
+          done
         fi
 
         # Handle favicon
@@ -205,6 +213,16 @@ runs:
           favicon_filename=$(basename "$FAVICON")
           FAVICON_CONFIG="favicon: '/$favicon_filename',"
           echo "   ✓ Favicon copied: $FAVICON"
+        else
+          # Auto-detect favicon in content directory
+          for name in favicon.svg favicon.ico favicon.png; do
+            if [ -f "../$CONTENT_DIR/$name" ]; then
+              cp "../$CONTENT_DIR/$name" public/
+              FAVICON_CONFIG="favicon: '/$name',"
+              echo "   ✓ Favicon auto-detected: $name"
+              break
+            fi
+          done
         fi
 
         # Astro configuration
@@ -238,6 +256,14 @@ runs:
 
         if [ -n "$FAVICON" ]; then
           export STARLIGHT_FAVICON="/$(basename "$FAVICON")"
+        else
+          # Check if auto-detected favicon was copied
+          for name in favicon.svg favicon.ico favicon.png; do
+            if [ -f "public/$name" ]; then
+              export STARLIGHT_FAVICON="/$name"
+              break
+            fi
+          done
         fi
 
         if [ -n "$SIDEBAR" ]; then
