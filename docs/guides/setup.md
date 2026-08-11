@@ -107,4 +107,4 @@ Add an `astro.config.mjs` to your repo root for full control over Starlight opti
 
 ### 3. Custom theme
 
-Add a `theme/` directory with component overrides and CSS. The action copies it into the build automatically. See the [Configuration](/guides/configuration/) page for details.
+Add a `theme/` directory with component overrides and CSS. The action copies it into the build automatically. See the [Configuration](../configuration/) page for details.

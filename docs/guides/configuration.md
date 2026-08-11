@@ -66,7 +66,7 @@ with:
 
 Accepts YAML or JSON. Defines the navigation structure. If not set, the sidebar is auto-generated from your content directory.
 
-[See sidebar examples →](/guides/examples/#with-custom-sidebar)
+[See sidebar examples →](../examples/#with-custom-sidebar)
 
 ```yaml
 with:
@@ -85,7 +85,7 @@ with:
 
 Accepts YAML or JSON. Shown as icons in the header. Defaults to a GitHub link to your repository.
 
-[See social examples →](/guides/examples/#with-social-links)
+[See social examples →](../examples/#with-social-links)
 
 ```yaml
 with:
@@ -104,7 +104,7 @@ Available icons: `github`, `discord`, `x.com`, `mastodon`, `youtube`, `twitch`, 
 
 Auto-detects `CHANGELOG.md` from your repo root and includes it in the docs.
 
-[See changelog examples →](/guides/examples/#changelog)
+[See changelog examples →](../examples/#changelog)
 
 | Value | Behaviour |
 |-------|-----------|
@@ -131,7 +131,7 @@ with:
   logo: "assets/my-logo.png"
 ```
 
-[See logo examples →](/guides/examples/#with-custom-branding)
+[See logo examples →](../examples/#with-custom-branding)
 
 ## Favicon
 
@@ -150,7 +150,7 @@ For full control, place an `astro.config.mjs` at your repository root. The actio
 
 When using a custom config, the bundled theme is still available at `./theme/`.
 
-[See custom config examples →](/guides/examples/#with-custom-astro-config)
+[See custom config examples →](../examples/#with-custom-astro-config)
 
 ## Supported Content
 

@@ -13,7 +13,7 @@ This page demonstrates all the custom theme components.
 
 #### Fourth-level heading
 
-Regular paragraph text with **bold**, *italic*, `inline code`, and [a link](/guides/setup/).
+Regular paragraph text with **bold**, *italic*, `inline code`, and [a link](../setup/).
 
 > Blockquotes look like this. Useful for callouts and important notes.
 
