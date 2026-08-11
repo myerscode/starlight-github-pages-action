@@ -58,18 +58,21 @@ Create a `docs/` directory with your Markdown files:
 
 ```
 docs/
-├── index.md          # Homepage
+├── index.md              # Homepage
 ├── getting-started.md
+├── logo.svg              # Logo (optional)
+├── favicon.svg           # Favicon (optional)
 └── guides/
+    ├── index.md          # Section landing page (optional)
     ├── installation.md
     └── configuration.md
 ```
 
-An `index.md` at the root of your content directory becomes the homepage.
+An `index.md` at the root of your content directory becomes the homepage. An `index.md` inside a subdirectory becomes that section's landing page.
 
-## Content Frontmatter
+## Frontmatter
 
-Control page titles, descriptions, and sidebar ordering with frontmatter:
+Control page metadata with frontmatter:
 
 ```markdown
 ---
@@ -90,6 +93,18 @@ Supported fields:
 - `sidebar.order` — position in navigation (lower numbers first)
 - `sidebar.label` — custom label shown in the sidebar
 
-## Custom Astro Config
+## Customisation Levels
 
-For advanced control, place an `astro.config.mjs` in your repository root. If detected, the action uses it instead of generating one. This gives you full access to Starlight's configuration options — custom sidebars, plugins, themes, and more.
+The action supports three levels of customisation:
+
+### 1. Zero config (just inputs)
+
+Only set `site-title` and `content-dir`. The action generates everything.
+
+### 2. Custom Astro config
+
+Add an `astro.config.mjs` to your repo root for full control over Starlight options — sidebar structure, social links, plugins, etc.
+
+### 3. Custom theme
+
+Add a `theme/` directory with component overrides and CSS. The action copies it into the build automatically. See the [Configuration](/guides/configuration/) page for details.

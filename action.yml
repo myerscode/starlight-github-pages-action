@@ -30,6 +30,18 @@ inputs:
     description: 'Path to custom logo file'
     required: false
     default: ''
+  changelog:
+    description: 'Include changelog in docs. Set to "false" to disable, or a path to a specific file. Defaults to auto-detecting CHANGELOG.md from repo root.'
+    required: false
+    default: 'auto'
+  sidebar:
+    description: 'JSON array defining the sidebar structure. If not set, sidebar is auto-generated from content directory.'
+    required: false
+    default: ''
+  social:
+    description: 'JSON array of social links, e.g. [{"label":"GitHub","icon":"github","href":"https://github.com/org/repo"}]'
+    required: false
+    default: ''
 
 outputs:
   site-url:
@@ -61,6 +73,9 @@ runs:
         BASE_PATH: ${{ inputs.base-path }}
         FAVICON: ${{ inputs.favicon }}
         LOGO: ${{ inputs.logo }}
+        CHANGELOG: ${{ inputs.changelog }}
+        SIDEBAR: ${{ inputs.sidebar }}
+        SOCIAL: ${{ inputs.social }}
         GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
         PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
@@ -109,7 +124,7 @@ runs:
 
         # Install dependencies
         echo "📦 Installing dependencies..."
-        npm install astro @astrojs/starlight
+        npm install astro @astrojs/starlight astro-icon @iconify-json/lucide tailwindcss @tailwindcss/vite
 
         # Copy user content into src/content/docs
         echo "📝 Processing content..."
@@ -131,6 +146,47 @@ runs:
         fi
 
         echo "   ✓ Content copied"
+
+        # Handle changelog
+        if [ "$CHANGELOG" != "false" ]; then
+          # Check if user already has a changelog in their content dir (takes precedence)
+          if find "src/content/docs" -maxdepth 1 -iname "changelog*" | grep -qi .; then
+            echo "   ✓ Changelog found in content directory (using existing)"
+          else
+            CHANGELOG_SOURCE=""
+
+            if [ "$CHANGELOG" = "auto" ]; then
+              # Auto-detect: look for common changelog filenames in repo root
+              for name in CHANGELOG.md changelog.md CHANGELOG CHANGELOG.txt; do
+                if [ -f "../$name" ]; then
+                  CHANGELOG_SOURCE="../$name"
+                  break
+                fi
+              done
+            elif [ -f "../$CHANGELOG" ]; then
+              # User specified a path
+              CHANGELOG_SOURCE="../$CHANGELOG"
+            fi
+
+            if [ -n "$CHANGELOG_SOURCE" ]; then
+              # Copy and ensure it has proper frontmatter
+              if head -1 "$CHANGELOG_SOURCE" | grep -q "^---"; then
+                cp "$CHANGELOG_SOURCE" "src/content/docs/changelog.md"
+              else
+                # Add frontmatter wrapper
+                {
+                  echo "---"
+                  echo "title: Changelog"
+                  echo "description: Version history and release notes"
+                  echo "---"
+                  echo ""
+                  cat "$CHANGELOG_SOURCE"
+                } > "src/content/docs/changelog.md"
+              fi
+              echo "   ✓ Changelog copied from $(basename "$CHANGELOG_SOURCE")"
+            fi
+          fi
+        fi
 
         # Handle logo
         LOGO_CONFIG=""
@@ -154,7 +210,12 @@ runs:
         # Astro configuration
         SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
 
+        # Always copy the bundled theme from the action
+        cp -r "$ACTION_PATH/theme" ./theme
+        echo "   ✓ Theme copied"
+
         if [ -f "../astro.config.mjs" ]; then
+          # Consumer provides their own config — use it
           echo "⚙️  Using astro.config.mjs from repository..."
           cp "../astro.config.mjs" astro.config.mjs
 
@@ -163,34 +224,40 @@ runs:
 
           echo "   ✓ User config copied (site: $SITE_URL, base: $BASE_PATH)"
         else
-          echo "⚙️  Generating Astro configuration..."
+          # Use the default template from the action, configured via env vars
+          echo "⚙️  Using default config template..."
+          cp "$ACTION_PATH/astro.config.mjs" astro.config.mjs
+          echo "   ✓ Default config copied"
+        fi
 
-          SOCIAL_CONFIG=""
-          if [ -n "$GITHUB_REPO_URL" ]; then
-            SOCIAL_CONFIG="social: [{ label: 'GitHub', icon: 'github', href: '$GITHUB_REPO_URL' }],"
+        # Set env vars that the config template reads
+        export STARLIGHT_SITE="$SITE_URL"
+        export STARLIGHT_BASE="$BASE_PATH"
+        export STARLIGHT_TITLE="$SITE_TITLE"
+        export STARLIGHT_DESCRIPTION="$SITE_DESCRIPTION"
+
+        if [ -n "$FAVICON" ]; then
+          export STARLIGHT_FAVICON="/$(basename "$FAVICON")"
+        fi
+
+        if [ -n "$SIDEBAR" ]; then
+          # Detect if input is JSON (starts with [) or YAML
+          if echo "$SIDEBAR" | grep -q '^\s*\['; then
+            export STARLIGHT_SIDEBAR="$SIDEBAR"
+          else
+            export STARLIGHT_SIDEBAR=$(echo "$SIDEBAR" | yq -o=json '.')
           fi
+        fi
 
-          cat > astro.config.mjs <<ASTROCFG
-        import { defineConfig } from 'astro/config';
-        import starlight from '@astrojs/starlight';
-
-        export default defineConfig({
-          site: '$SITE_URL',
-          base: '$BASE_PATH',
-          integrations: [
-            starlight({
-              title: '$SITE_TITLE',
-              description: '$SITE_DESCRIPTION',
-              $LOGO_CONFIG
-              $FAVICON_CONFIG
-              $SOCIAL_CONFIG
-            }),
-          ],
-        });
-        ASTROCFG
-          sed -i 's/^        //' astro.config.mjs
-
-          echo "   ✓ Configuration generated"
+        # Social: use input if provided, otherwise default to GitHub link
+        if [ -n "$SOCIAL" ]; then
+          if echo "$SOCIAL" | grep -q '^\s*\['; then
+            export STARLIGHT_SOCIAL="$SOCIAL"
+          else
+            export STARLIGHT_SOCIAL=$(echo "$SOCIAL" | yq -o=json '.')
+          fi
+        elif [ -n "$GITHUB_REPO_URL" ]; then
+          export STARLIGHT_SOCIAL="[{\"label\":\"GitHub\",\"icon\":\"github\",\"href\":\"$GITHUB_REPO_URL\"}]"
         fi
 
         cat astro.config.mjs

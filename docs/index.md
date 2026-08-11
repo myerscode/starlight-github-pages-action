@@ -52,6 +52,16 @@ jobs:
 
 Then add Markdown files to a `docs/` directory and push. Your site will be live at `https://<user>.github.io/<repo>/`.
 
+## What You Get
+
+- Responsive navigation sidebar with collapsible groups
+- Full-text search (Pagefind)
+- Dark/light mode toggle
+- GitHub link in the header
+- Prev/next pagination
+- Custom theme with icon support
+- Automatic base path detection for GitHub Pages
+
 ## Requirements
 
 - GitHub Pages enabled in your repo settings (source: "GitHub Actions")

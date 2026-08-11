@@ -2,7 +2,7 @@ name: Test Action
 
 on:
   push:
-    branches: [main, fix/action]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -29,5 +29,22 @@ jobs:
         uses: ./
         with:
           site-title: "Starlight GitHub Pages Action"
-          site-description: "Documentation for the Starlight GitHub Pages Action"
+          site-description: "Zero-config Starlight documentation deployment to GitHub Pages"
           content-dir: "docs"
+          social: |
+            - label: GitHub
+              icon: github
+              href: https://github.com/myerscode/starlight-github-pages-action
+          sidebar: |
+            - label: Getting Started
+              slug: ""
+            - label: Usage Guides
+              items:
+                - label: Setup
+                  slug: guides/setup
+                - label: Configuration
+                  slug: guides/configuration
+                - label: Examples
+                  slug: guides/examples
+                - label: Showcase
+                  slug: guides/showcase
