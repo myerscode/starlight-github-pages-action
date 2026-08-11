@@ -232,6 +232,12 @@ runs:
         cp -r "$ACTION_PATH/theme" ./theme
         echo "   ✓ Theme copied"
 
+        # Copy theme assets to public
+        if [ -d "./theme/assets" ]; then
+          cp ./theme/assets/404.svg public/_404.svg 2>/dev/null || true
+          echo "   ✓ Theme assets copied to public"
+        fi
+
         if [ -f "../astro.config.mjs" ]; then
           # Consumer provides their own config — use it
           echo "⚙️  Using astro.config.mjs from repository..."
