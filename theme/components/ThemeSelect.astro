@@ -99,3 +99,49 @@
 
   customElements.define('starlight-theme-select', ThemeToggle);
 </script>
+
+<script>
+  class ThemeToggle extends HTMLElement {
+    connectedCallback() {
+      const buttons = this.querySelectorAll<HTMLButtonElement>('.theme-option');
+      const stored = localStorage.getItem('starlight-theme') || 'auto';
+      this.setActive(stored);
+
+      // Sync the actual page theme on init (Starlight's ThemeProvider may have set it)
+      this.applyTheme(stored);
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const value = btn.dataset.themeValue!;
+          this.setActive(value);
+          this.applyTheme(value);
+          localStorage.setItem('starlight-theme', value);
+        });
+      });
+
+      // Listen for system theme changes when in auto mode
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if ((localStorage.getItem('starlight-theme') || 'auto') === 'auto') {
+          this.applyTheme('auto');
+        }
+      });
+    }
+
+    applyTheme(value: string) {
+      if (value === 'auto') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = prefersDark ? 'dark' : 'light';
+      } else {
+        document.documentElement.dataset.theme = value;
+      }
+    }
+
+    setActive(value: string) {
+      this.querySelectorAll<HTMLButtonElement>('.theme-option').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.themeValue === value);
+      });
+    }
+  }
+
+  customElements.define('starlight-theme-select', ThemeToggle);
+</script>
