@@ -118,13 +118,15 @@ runs:
         mkdir -p "$BUILD_DIR/public"
 
         cp "$ACTION_PATH/template/package.json" "$BUILD_DIR/package.json"
+        cp "$ACTION_PATH/template/package-lock.json" "$BUILD_DIR/package-lock.json"
         cp "$ACTION_PATH/template/src/content.config.ts" "$BUILD_DIR/src/content.config.ts"
 
         cd "$BUILD_DIR"
 
         # Install dependencies
         echo "📦 Installing dependencies..."
-        npm install
+        npm ci --omit=dev
+        echo "✅ Dependencies installed"
 
         # Copy user content into src/content/docs
         echo "📝 Processing content..."
