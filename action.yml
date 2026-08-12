@@ -124,7 +124,7 @@ runs:
 
         # Install dependencies
         echo "📦 Installing dependencies..."
-        npm install astro @astrojs/starlight astro-icon @iconify-json/lucide tailwindcss @tailwindcss/vite
+        npm install
 
         # Copy user content into src/content/docs
         echo "📝 Processing content..."
