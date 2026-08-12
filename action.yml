@@ -242,11 +242,7 @@ runs:
           # Consumer provides their own config — use it
           echo "⚙️  Using astro.config.mjs from repository..."
           cp "../astro.config.mjs" astro.config.mjs
-
-          # Inject site and base into user config for correct asset paths
-          sed -i "s|defineConfig({|defineConfig({\n  site: '$SITE_URL',\n  base: '$BASE_PATH',|" astro.config.mjs
-
-          echo "   ✓ User config copied (site: $SITE_URL, base: $BASE_PATH)"
+          echo "   ✓ User config copied"
         else
           # Use the default template from the action, configured via env vars
           echo "⚙️  Using default config template..."
