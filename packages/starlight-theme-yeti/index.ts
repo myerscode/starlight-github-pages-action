@@ -33,16 +33,17 @@ export default function starlightThemeYeti(config?: YetiThemeConfig): StarlightP
     name: "@myerscode/starlight-theme-yeti",
     hooks: {
       "config:setup"({ config: starlightConfig, updateConfig }) {
+
         // Build component overrides — respect user overrides
         const userOverrides = config?.overrides || {};
         const components: Record<string, string> = {};
 
         for (const [name, path] of Object.entries(defaultComponents)) {
-          if (userOverrides[name] === false) continue; // disabled
+          if (userOverrides[name] === false) continue;
           components[name] = (userOverrides[name] as string) || path;
         }
 
-        // Prepend theme CSS before any user CSS
+        // Theme CSS: virtual module for Tailwind config + theme styles
         const customCss = [
           `${PKG}/styles/global.css`,
           `${PKG}/styles/theme.css`,

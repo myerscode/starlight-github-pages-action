@@ -2,9 +2,6 @@
   "name": "starlight-docs",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "../packages/starlight-theme-yeti"
-  ],
   "scripts": {
     "build": "astro build"
   },
@@ -15,6 +12,6 @@
     "@iconify-json/lucide": "1.2.123",
     "tailwindcss": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
-    "@myerscode/starlight-theme-yeti": "*"
+    "@myerscode/starlight-theme-yeti": "workspace:*"
   }
 }

@@ -123,7 +123,8 @@ runs:
 
         # Install dependencies
         echo "📦 Installing dependencies..."
-        npm ci --omit=dev
+        corepack enable
+        pnpm install --frozen-lockfile
 
         # Prepare content directories
         rm -rf src/content/docs
@@ -275,7 +276,7 @@ runs:
 
         # Build the site
         echo "🔨 Building Starlight site..."
-        npm run build
+        pnpm run build
 
         # Validate build output
         if [ ! -f "dist/index.html" ]; then
