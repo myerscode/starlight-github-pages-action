@@ -188,37 +188,30 @@ runs:
           fi
         fi
 
-        # Handle logo
-        LOGO_CONFIG=""
+        # Handle logo — copy to src/assets for Starlight's asset pipeline
+        mkdir -p src/assets
         if [ -n "$LOGO" ] && [ -f "../$LOGO" ]; then
-          mkdir -p src/assets
           cp "../$LOGO" src/assets/
-          logo_filename=$(basename "$LOGO")
-          LOGO_CONFIG="logo: { src: './src/assets/$logo_filename' },"
           echo "   ✓ Logo copied: $LOGO"
         else
-          # Auto-detect logos in content directory and copy to public root
+          # Auto-detect logos in content directory
           for name in logo-dark.svg logo-light.svg logo.svg; do
             if [ -f "../$CONTENT_DIR/$name" ]; then
-              cp "../$CONTENT_DIR/$name" public/
+              cp "../$CONTENT_DIR/$name" src/assets/
               echo "   ✓ Logo auto-detected: $name"
             fi
           done
         fi
 
-        # Handle favicon
-        FAVICON_CONFIG=""
+        # Handle favicon — copy to public, config is set via STARLIGHT_FAVICON env var later
         if [ -n "$FAVICON" ] && [ -f "../$FAVICON" ]; then
           cp "../$FAVICON" public/
-          favicon_filename=$(basename "$FAVICON")
-          FAVICON_CONFIG="favicon: '/$favicon_filename',"
           echo "   ✓ Favicon copied: $FAVICON"
         else
           # Auto-detect favicon in content directory
           for name in favicon.svg favicon.ico favicon.png; do
             if [ -f "../$CONTENT_DIR/$name" ]; then
               cp "../$CONTENT_DIR/$name" public/
-              FAVICON_CONFIG="favicon: '/$name',"
               echo "   ✓ Favicon auto-detected: $name"
               break
             fi
@@ -266,6 +259,15 @@ runs:
               break
             fi
           done
+        fi
+
+        # Set logo env var if logos exist
+        if [ -n "$LOGO" ] && [ -f "src/assets/$(basename "$LOGO")" ]; then
+          export STARLIGHT_LOGO="{\"src\":\"./src/assets/$(basename "$LOGO")\"}"
+        elif [ -f "src/assets/logo-dark.svg" ] && [ -f "src/assets/logo-light.svg" ]; then
+          export STARLIGHT_LOGO="{\"light\":\"./src/assets/logo-dark.svg\",\"dark\":\"./src/assets/logo-light.svg\"}"
+        elif [ -f "src/assets/logo.svg" ]; then
+          export STARLIGHT_LOGO="{\"src\":\"./src/assets/logo.svg\"}"
         fi
 
         if [ -n "$SIDEBAR" ]; then

@@ -27,6 +27,7 @@ export default defineConfig({
       title: process.env.STARLIGHT_TITLE || 'Documentation',
       description: process.env.STARLIGHT_DESCRIPTION || 'Documentation site built with Starlight',
       ...(process.env.STARLIGHT_FAVICON && { favicon: process.env.STARLIGHT_FAVICON }),
+      ...(process.env.STARLIGHT_LOGO && { logo: JSON.parse(process.env.STARLIGHT_LOGO) }),
       ...(social && { social }),
       ...(sidebar && { sidebar }),
       customCss: [

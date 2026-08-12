@@ -1,18 +1,37 @@
 ---
+import { logos } from 'virtual:starlight/user-images';
+import config from 'virtual:starlight/user-config';
 import Search from "virtual:starlight/components/Search";
 import SocialIcons from "virtual:starlight/components/SocialIcons";
 import ThemeSelect from "./ThemeSelect.astro";
 
 const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
-const base = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 ---
 
 <div class="flex w-full items-center justify-between gap-6 px-2">
   <!-- Brand -->
   <a href={siteTitleHref || "/"} class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900 no-underline dark:text-white">
-    <img src={`${base}logo-dark.svg`} alt="" class="h-7 w-7 dark:hidden" onerror="this.style.display='none'" />
-    <img src={`${base}logo-light.svg`} alt="" class="hidden h-7 w-7 dark:block" onerror="this.style.display='none'" />
-    <span>{siteTitle}</span>
+    {config.logo && logos.dark && (
+      <>
+        <img
+          class:list={["h-7 w-auto", { "light:sl-hidden": !('src' in config.logo) }]}
+          alt={config.logo.alt}
+          src={logos.dark.src}
+          width={logos.dark.width}
+          height={logos.dark.height}
+        />
+        {!('src' in config.logo) && (
+          <img
+            class="h-7 w-auto dark:sl-hidden"
+            alt={config.logo.alt}
+            src={logos.light?.src}
+            width={logos.light?.width}
+            height={logos.light?.height}
+          />
+        )}
+      </>
+    )}
+    <span class:list={{ "sr-only": config.logo?.replacesTitle }}>{siteTitle}</span>
   </a>
 
   <!-- Right side -->
