@@ -6,9 +6,6 @@ const hasToc = toc && toc.items.length > 0;
 
 {hasToc && (
   <nav aria-label="On this page">
-    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-      On this page
-    </p>
     <TableOfContents {...Astro.props} />
   </nav>
 )}

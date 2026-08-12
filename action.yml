@@ -35,11 +35,11 @@ inputs:
     required: false
     default: 'auto'
   sidebar:
-    description: 'JSON array defining the sidebar structure. If not set, sidebar is auto-generated from content directory.'
+    description: 'Sidebar structure in YAML or JSON format.'
     required: false
     default: ''
   social:
-    description: 'JSON array of social links, e.g. [{"label":"GitHub","icon":"github","href":"https://github.com/org/repo"}]'
+    description: 'Social links in YAML or JSON format.'
     required: false
     default: ''
 
@@ -85,6 +85,13 @@ runs:
 
         echo "🚀 Starting Starlight build process..."
 
+        # Install yq for YAML parsing
+        if ! command -v yq &> /dev/null; then
+          echo "📥 Installing yq..."
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+        fi
+
         # Validate inputs
         if [ -z "$SITE_TITLE" ]; then
           echo "❌ Error: site-title is required"
@@ -93,7 +100,6 @@ runs:
 
         CONTENT_DIR="${CONTENT_DIR:-docs}"
         SITE_DESCRIPTION="${SITE_DESCRIPTION:-Documentation site built with Starlight}"
-        BUILD_DIR=".starlight-build"
 
         # Use configure-pages output for base path if not explicitly set
         if [ -z "$BASE_PATH" ]; then
@@ -112,35 +118,35 @@ runs:
           exit 1
         fi
 
-        # Scaffold build directory from template
-        rm -rf "$BUILD_DIR"
-        mkdir -p "$BUILD_DIR/src/content/docs"
-        mkdir -p "$BUILD_DIR/public"
-
-        cp "$ACTION_PATH/template/package.json" "$BUILD_DIR/package.json"
-        cp "$ACTION_PATH/template/package-lock.json" "$BUILD_DIR/package-lock.json"
-        cp "$ACTION_PATH/template/src/content.config.ts" "$BUILD_DIR/src/content.config.ts"
-
-        cd "$BUILD_DIR"
+        # Build from the template directory
+        cd "$ACTION_PATH/template"
 
         # Install dependencies
         echo "📦 Installing dependencies..."
         npm ci --omit=dev
-        echo "✅ Dependencies installed"
+
+        # Prepare content directories
+        rm -rf src/content/docs
+        mkdir -p src/content/docs
+        mkdir -p public
+        mkdir -p src/assets
+
+        # Copy theme assets to public
+        cp "$ACTION_PATH/packages/starlight-theme-yeti/assets/404.svg" public/_404.svg 2>/dev/null || true
 
         # Copy user content into src/content/docs
         echo "📝 Processing content..."
-        find "../$CONTENT_DIR" \( -name "*.md" -o -name "*.mdx" \) | while read -r file; do
-          rel_path=$(realpath --relative-to="../$CONTENT_DIR" "$file")
+        find "$GITHUB_WORKSPACE/$CONTENT_DIR" \( -name "*.md" -o -name "*.mdx" \) | while read -r file; do
+          rel_path=$(realpath --relative-to="$GITHUB_WORKSPACE/$CONTENT_DIR" "$file")
           target_dir="src/content/docs/$(dirname "$rel_path")"
           mkdir -p "$target_dir"
           cp "$file" "$target_dir/"
         done
 
         # Copy non-markdown assets to public/assets
-        if find "../$CONTENT_DIR" -type f ! \( -name "*.md" -o -name "*.mdx" \) | grep -q .; then
-          find "../$CONTENT_DIR" -type f ! \( -name "*.md" -o -name "*.mdx" \) | while read -r file; do
-            rel_path=$(realpath --relative-to="../$CONTENT_DIR" "$file")
+        if find "$GITHUB_WORKSPACE/$CONTENT_DIR" -type f ! \( -name "*.md" -o -name "*.mdx" \) | grep -q .; then
+          find "$GITHUB_WORKSPACE/$CONTENT_DIR" -type f ! \( -name "*.md" -o -name "*.mdx" \) | while read -r file; do
+            rel_path=$(realpath --relative-to="$GITHUB_WORKSPACE/$CONTENT_DIR" "$file")
             target_dir="public/assets/$(dirname "$rel_path")"
             mkdir -p "$target_dir"
             cp "$file" "$target_dir/"
@@ -151,31 +157,25 @@ runs:
 
         # Handle changelog
         if [ "$CHANGELOG" != "false" ]; then
-          # Check if user already has a changelog in their content dir (takes precedence)
           if find "src/content/docs" -maxdepth 1 -iname "changelog*" | grep -qi .; then
             echo "   ✓ Changelog found in content directory (using existing)"
           else
             CHANGELOG_SOURCE=""
-
             if [ "$CHANGELOG" = "auto" ]; then
-              # Auto-detect: look for common changelog filenames in repo root
               for name in CHANGELOG.md changelog.md CHANGELOG CHANGELOG.txt; do
-                if [ -f "../$name" ]; then
-                  CHANGELOG_SOURCE="../$name"
+                if [ -f "$GITHUB_WORKSPACE/$name" ]; then
+                  CHANGELOG_SOURCE="$GITHUB_WORKSPACE/$name"
                   break
                 fi
               done
-            elif [ -f "../$CHANGELOG" ]; then
-              # User specified a path
-              CHANGELOG_SOURCE="../$CHANGELOG"
+            elif [ -f "$GITHUB_WORKSPACE/$CHANGELOG" ]; then
+              CHANGELOG_SOURCE="$GITHUB_WORKSPACE/$CHANGELOG"
             fi
 
             if [ -n "$CHANGELOG_SOURCE" ]; then
-              # Copy and ensure it has proper frontmatter
               if head -1 "$CHANGELOG_SOURCE" | grep -q "^---"; then
                 cp "$CHANGELOG_SOURCE" "src/content/docs/changelog.md"
               else
-                # Add frontmatter wrapper
                 {
                   echo "---"
                   echo "title: Changelog"
@@ -190,30 +190,27 @@ runs:
           fi
         fi
 
-        # Handle logo — copy to src/assets for Starlight's asset pipeline
-        mkdir -p src/assets
-        if [ -n "$LOGO" ] && [ -f "../$LOGO" ]; then
-          cp "../$LOGO" src/assets/
+        # Handle logo
+        if [ -n "$LOGO" ] && [ -f "$GITHUB_WORKSPACE/$LOGO" ]; then
+          cp "$GITHUB_WORKSPACE/$LOGO" src/assets/
           echo "   ✓ Logo copied: $LOGO"
         else
-          # Auto-detect logos in content directory
           for name in logo-dark.svg logo-light.svg logo.svg; do
-            if [ -f "../$CONTENT_DIR/$name" ]; then
-              cp "../$CONTENT_DIR/$name" src/assets/
+            if [ -f "$GITHUB_WORKSPACE/$CONTENT_DIR/$name" ]; then
+              cp "$GITHUB_WORKSPACE/$CONTENT_DIR/$name" src/assets/
               echo "   ✓ Logo auto-detected: $name"
             fi
           done
         fi
 
-        # Handle favicon — copy to public, config is set via STARLIGHT_FAVICON env var later
-        if [ -n "$FAVICON" ] && [ -f "../$FAVICON" ]; then
-          cp "../$FAVICON" public/
+        # Handle favicon
+        if [ -n "$FAVICON" ] && [ -f "$GITHUB_WORKSPACE/$FAVICON" ]; then
+          cp "$GITHUB_WORKSPACE/$FAVICON" public/
           echo "   ✓ Favicon copied: $FAVICON"
         else
-          # Auto-detect favicon in content directory
           for name in favicon.svg favicon.ico favicon.png; do
-            if [ -f "../$CONTENT_DIR/$name" ]; then
-              cp "../$CONTENT_DIR/$name" public/
+            if [ -f "$GITHUB_WORKSPACE/$CONTENT_DIR/$name" ]; then
+              cp "$GITHUB_WORKSPACE/$CONTENT_DIR/$name" public/
               echo "   ✓ Favicon auto-detected: $name"
               break
             fi
@@ -223,29 +220,16 @@ runs:
         # Astro configuration
         SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
 
-        # Always copy the bundled theme from the action
-        cp -r "$ACTION_PATH/theme" ./theme
-        echo "   ✓ Theme copied"
-
-        # Copy theme assets to public
-        if [ -d "./theme/assets" ]; then
-          cp ./theme/assets/404.svg public/_404.svg 2>/dev/null || true
-          echo "   ✓ Theme assets copied to public"
-        fi
-
-        if [ -f "../astro.config.mjs" ]; then
-          # Consumer provides their own config — use it
+        if [ -f "$GITHUB_WORKSPACE/astro.config.mjs" ]; then
           echo "⚙️  Using astro.config.mjs from repository..."
-          cp "../astro.config.mjs" astro.config.mjs
+          cp "$GITHUB_WORKSPACE/astro.config.mjs" astro.config.mjs
           echo "   ✓ User config copied"
+          echo "   ℹ️  Use process.env.STARLIGHT_SITE and process.env.STARLIGHT_BASE in your config for correct paths"
         else
-          # Use the default template from the action, configured via env vars
           echo "⚙️  Using default config template..."
-          cp "$ACTION_PATH/astro.config.mjs" astro.config.mjs
-          echo "   ✓ Default config copied"
         fi
 
-        # Set env vars that the config template reads
+        # Set env vars that the config reads
         export STARLIGHT_SITE="$SITE_URL"
         export STARLIGHT_BASE="$BASE_PATH"
         export STARLIGHT_TITLE="$SITE_TITLE"
@@ -254,7 +238,6 @@ runs:
         if [ -n "$FAVICON" ]; then
           export STARLIGHT_FAVICON="/$(basename "$FAVICON")"
         else
-          # Check if auto-detected favicon was copied
           for name in favicon.svg favicon.ico favicon.png; do
             if [ -f "public/$name" ]; then
               export STARLIGHT_FAVICON="/$name"
@@ -263,7 +246,7 @@ runs:
           done
         fi
 
-        # Set logo env var if logos exist
+        # Set logo env var
         if [ -n "$LOGO" ] && [ -f "src/assets/$(basename "$LOGO")" ]; then
           export STARLIGHT_LOGO="{\"src\":\"./src/assets/$(basename "$LOGO")\"}"
         elif [ -f "src/assets/logo-dark.svg" ] && [ -f "src/assets/logo-light.svg" ]; then
@@ -273,7 +256,6 @@ runs:
         fi
 
         if [ -n "$SIDEBAR" ]; then
-          # Detect if input is JSON (starts with [) or YAML
           if echo "$SIDEBAR" | grep -q '^\s*\['; then
             export STARLIGHT_SIDEBAR="$SIDEBAR"
           else
@@ -281,7 +263,6 @@ runs:
           fi
         fi
 
-        # Social: use input if provided, otherwise default to GitHub link
         if [ -n "$SOCIAL" ]; then
           if echo "$SOCIAL" | grep -q '^\s*\['; then
             export STARLIGHT_SOCIAL="$SOCIAL"
@@ -291,8 +272,6 @@ runs:
         elif [ -n "$GITHUB_REPO_URL" ]; then
           export STARLIGHT_SOCIAL="[{\"label\":\"GitHub\",\"icon\":\"github\",\"href\":\"$GITHUB_REPO_URL\"}]"
         fi
-
-        cat astro.config.mjs
 
         # Build the site
         echo "🔨 Building Starlight site..."
@@ -311,7 +290,7 @@ runs:
     - name: Upload Pages Artifact
       uses: actions/upload-pages-artifact@v5
       with:
-        path: .starlight-build/dist
+        path: ${{ github.action_path }}/template/dist
 
     - name: Deploy to GitHub Pages
       id: deploy

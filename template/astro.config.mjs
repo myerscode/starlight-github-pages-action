@@ -6,6 +6,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
+import starlightThemeYeti from '@myerscode/starlight-theme-yeti';
 
 const sidebar = process.env.STARLIGHT_SIDEBAR
   ? JSON.parse(process.env.STARLIGHT_SIDEBAR)
@@ -30,29 +31,7 @@ export default defineConfig({
       ...(process.env.STARLIGHT_LOGO && { logo: JSON.parse(process.env.STARLIGHT_LOGO) }),
       ...(social && { social }),
       ...(sidebar && { sidebar }),
-      customCss: [
-        './theme/styles/global.css',
-        './theme/styles/theme.css',
-      ],
-      components: {
-        SkipLink: './theme/components/SkipLink.astro',
-        PageFrame: './theme/components/PageFrame.astro',
-        TwoColumnContent: './theme/components/TwoColumnContent.astro',
-        Header: './theme/components/Header.astro',
-        Sidebar: './theme/components/Sidebar.astro',
-        SidebarSublist: './theme/components/SidebarSublist.astro',
-        PageSidebar: './theme/components/PageSidebar.astro',
-        Banner: './theme/components/Banner.astro',
-        ContentPanel: './theme/components/ContentPanel.astro',
-        PageTitle: './theme/components/PageTitle.astro',
-        Hero: './theme/components/Hero.astro',
-        MarkdownContent: './theme/components/MarkdownContent.astro',
-        Footer: './theme/components/Footer.astro',
-        LastUpdated: './theme/components/LastUpdated.astro',
-        EditLink: './theme/components/EditLink.astro',
-        Pagination: './theme/components/Pagination.astro',
-        ThemeSelect: './theme/components/ThemeSelect.astro',
-      },
+      plugins: [starlightThemeYeti()],
     }),
   ],
 });
