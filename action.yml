@@ -57,7 +57,7 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v7
       with:
-        node-version: '22'
+        node-version: '26'
 
     - name: Setup Pages
       id: pages
@@ -121,9 +121,8 @@ runs:
         # Build from the template directory
         cd "$ACTION_PATH/template"
 
-        # Install dependencies
         echo "📦 Installing dependencies..."
-        corepack enable
+        npm install -g pnpm@11
         pnpm install --frozen-lockfile
 
         # Prepare content directories
