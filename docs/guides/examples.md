@@ -171,7 +171,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
-import { linkableGroups } from './theme/sidebar.ts';
+import starlightThemeYeti from '@myerscode/starlight-theme-yeti';
+import { linkableGroups } from '@myerscode/starlight-theme-yeti/sidebar';
 
 export default defineConfig({
   vite: { plugins: [tailwindcss()] },
@@ -199,20 +200,13 @@ export default defineConfig({
           ],
         },
       ]),
-      customCss: ['./theme/styles/global.css', './theme/styles/theme.css'],
-      components: {
-        // Reference bundled theme components
-        Header: './theme/components/Header.astro',
-        Sidebar: './theme/components/Sidebar.astro',
-        SidebarSublist: './theme/components/SidebarSublist.astro',
-        // ... all other components
-      },
+      plugins: [starlightThemeYeti()],
     }),
   ],
 });
 ```
 
-The bundled theme is always available at `./theme/` in the build. The `linkableGroups` helper makes group headings clickable (linking to an index page). The `[icon-set:name]` syntax adds icons.
+The theme package [`@myerscode/starlight-theme-yeti`](https://github.com/myerscode/starlight-theme-yeti) is installed in the build, so custom configs can import it directly. The `linkableGroups` helper makes group headings clickable (linking to an index page). The `[icon-set:name]` syntax adds icons.
 
 ## Project Structure
 

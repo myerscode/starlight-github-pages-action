@@ -148,7 +148,11 @@ with:
 
 For full control, place an `astro.config.mjs` at your repository root. The action uses it instead of generating one — `site` and `base` are injected automatically.
 
-When using a custom config, the bundled theme is still available at `./theme/`.
+When using a custom config, the theme package [`@myerscode/starlight-theme-yeti`](https://github.com/myerscode/starlight-theme-yeti) is installed and available to import.
+
+## 404 Page
+
+The theme ships a branded 404 page — every site gets one with no setup. To customise it, add a `404.md` or `404.mdx` to your content directory; a `hero.image` in its frontmatter replaces the theme's artwork. If you use a [custom Astro config](#custom-astro-configuration), the theme plugin also accepts `notFoundImage: './path/to/image.svg'` (or `false` to disable the artwork).
 
 [See custom config examples →](../examples/#with-custom-astro-config)
 

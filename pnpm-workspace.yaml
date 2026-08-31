@@ -1,6 +1,6 @@
 packages:
-  - 'packages/*'
-  - 'example'
   - 'template'
 allowBuilds:
   esbuild: false
+minimumReleaseAgeExclude:
+  - '@myerscode/starlight-theme-yeti'

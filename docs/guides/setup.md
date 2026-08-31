@@ -105,6 +105,6 @@ Only set `site-title` and `content-dir`. The action generates everything.
 
 Add an `astro.config.mjs` to your repo root for full control over Starlight options — sidebar structure, social links, plugins, etc.
 
-### 3. Custom theme
+### 3. Custom theme components
 
-Add a `theme/` directory with component overrides and CSS. The action copies it into the build automatically. See the [Configuration](../configuration/) page for details.
+In a custom `astro.config.mjs`, the bundled theme package [`@myerscode/starlight-theme-yeti`](https://github.com/myerscode/starlight-theme-yeti) accepts overrides to replace or disable individual components. See the [Configuration](../configuration/) page for details.

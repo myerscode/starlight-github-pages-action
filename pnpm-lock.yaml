@@ -6,54 +6,6 @@ settings:
 
 importers:
 
-  example:
-    dependencies:
-      '@astrojs/starlight':
-        specifier: ^0.41.0
-        version: 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0))
-      '@astrojs/starlight-tailwind':
-        specifier: ^5.0.0
-        version: 5.0.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)))(tailwindcss@4.3.3)
-      '@iconify-json/lucide':
-        specifier: ^1.2.0
-        version: 1.2.123
-      '@myerscode/starlight-theme-yeti':
-        specifier: workspace:*
-        version: link:../packages/starlight-theme-yeti
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.3(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
-      astro:
-        specifier: ^7.0.0
-        version: 7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)
-      astro-icon:
-        specifier: ^1.1.0
-        version: 1.1.5
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.3
-
-  packages/starlight-theme-yeti:
-    dependencies:
-      '@astrojs/starlight':
-        specifier: ^0.41.0
-        version: 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0))
-      '@astrojs/starlight-tailwind':
-        specifier: ^5.0.0
-        version: 5.0.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)))(tailwindcss@4.3.3)
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.3(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
-      astro:
-        specifier: ^7.0.0
-        version: 7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)
-      astro-icon:
-        specifier: ^1.1.0
-        version: 1.1.5
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.3
-
   template:
     dependencies:
       '@astrojs/starlight':
@@ -63,8 +15,8 @@ importers:
         specifier: 1.2.123
         version: 1.2.123
       '@myerscode/starlight-theme-yeti':
-        specifier: workspace:*
-        version: link:../packages/starlight-theme-yeti
+        specifier: 1.1.0
+        version: 1.1.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)))(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0))(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
@@ -651,6 +603,12 @@ packages:
 
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
+
+  '@myerscode/starlight-theme-yeti@1.1.0':
+    resolution: {integrity: sha512-O8e6z6OcXNWwugweEKI+bCo3KUTr2IB21TByxIUMY3Hr/GdEkH9RUU/1jjV60cQUwOHrNJZ+npt6idBA3aJxFw==}
+    peerDependencies:
+      '@astrojs/starlight': ^0.41.0
+      astro: ^7.0.0
 
   '@napi-rs/wasm-runtime@1.2.2':
     resolution: {integrity: sha512-JfB4kuJQjaoHuCTseIINHtHWeJnvgEcxjwA5t/Y00ZgaOO1Crz3fjT/p8kT28zA/Caz7oiUMn3d6H2yOVCVwuw==}
@@ -2959,6 +2917,18 @@ snapshots:
       vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
+
+  '@myerscode/starlight-theme-yeti@1.1.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)))(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0))(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))':
+    dependencies:
+      '@astrojs/starlight': 0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0))
+      '@astrojs/starlight-tailwind': 5.0.0(@astrojs/starlight@0.41.7(@astrojs/markdown-remark@7.2.2)(astro@7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)))(tailwindcss@4.3.3)
+      '@tailwindcss/vite': 4.3.3(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
+      astro: 7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.2.0)(jiti@2.7.0)(yaml@2.9.0)
+      astro-icon: 1.1.5
+      tailwindcss: 4.3.3
+    transitivePeerDependencies:
+      - supports-color
+      - vite
 
   '@napi-rs/wasm-runtime@1.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:

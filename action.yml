@@ -131,9 +131,6 @@ runs:
         mkdir -p public
         mkdir -p src/assets
 
-        # Copy theme assets to public
-        cp "$ACTION_PATH/packages/starlight-theme-yeti/assets/404.svg" public/_404.svg 2>/dev/null || true
-
         # Copy user content into src/content/docs
         echo "📝 Processing content..."
         find "$GITHUB_WORKSPACE/$CONTENT_DIR" \( -name "*.md" -o -name "*.mdx" \) | while read -r file; do

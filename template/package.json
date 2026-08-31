@@ -12,6 +12,6 @@
     "@iconify-json/lucide": "1.2.123",
     "tailwindcss": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
-    "@myerscode/starlight-theme-yeti": "workspace:*"
+    "@myerscode/starlight-theme-yeti": "1.1.0"
   }
 }

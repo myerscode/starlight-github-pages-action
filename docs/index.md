@@ -60,6 +60,7 @@ Then add Markdown files to a `docs/` directory and push. Your site will be live 
 - GitHub link in the header
 - Prev/next pagination
 - Custom theme with icon support
+- Branded 404 page out of the box
 - Automatic base path detection for GitHub Pages
 
 ## Requirements
