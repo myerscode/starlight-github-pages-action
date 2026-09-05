@@ -17,6 +17,12 @@ In your repository settings:
 1. Go to **Settings** → **Pages**
 2. Set **Source** to "GitHub Actions"
 
+> **Note:** This manual step is optional. As long as your workflow has the
+> permissions shown in [step 2](#2-create-workflow), the action enables Pages
+> for you on the first run. Enabling it here manually is only needed if your
+> org blocks workflows from turning Pages on. If Pages can't be enabled either
+> way, the action stops early with a message explaining exactly what to fix.
+
 ### 2. Create Workflow
 
 Create `.github/workflows/deploy-docs.yml`:
@@ -148,17 +154,38 @@ Place images and other assets in your content directory. They'll be copied to `p
 
 ## Requirements
 
-- Repository with GitHub Pages enabled (source set to "GitHub Actions")
 - Content directory with at least one Markdown file
-- Workflow with `contents: read`, `pages: write`, and `id-token: write` permissions
+- Workflow with all three of these permissions — they're always required:
+  ```yaml
+  permissions:
+    contents: read
+    pages: write
+    id-token: write
+  ```
+
+With those permissions the action enables GitHub Pages for you on the first run
+and deploys the site. Enabling Pages manually in repo settings (Settings → Pages
+→ Source: "GitHub Actions") is optional — it does not remove the need for any of
+the permissions above, and is only useful if your org blocks workflows from
+enabling Pages.
 
 ## Troubleshooting
 
 **Build fails with "Content directory not found"**
 Verify your `content-dir` path is correct relative to your repository root.
 
-**Permission denied / Pages not enabled**
-Ensure GitHub Pages is enabled in repo settings with source set to "GitHub Actions", and that your workflow has the required permissions block.
+**"Could not configure GitHub Pages for this repository"**
+Pages isn't enabled and the action couldn't enable it. Make sure your workflow
+has all three required permissions:
+
+```yaml
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+```
+
+If your org restricts enabling Pages from a workflow, enable it manually as well (Settings → Pages → Source: "GitHub Actions"), then re-run.
 
 **No pages generated**
 Make sure you have at least one `.md` or `.mdx` file in your content directory. An `index.md` is recommended for the homepage.

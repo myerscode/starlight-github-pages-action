@@ -61,7 +61,42 @@ runs:
 
     - name: Setup Pages
       id: pages
+      continue-on-error: true
       uses: actions/configure-pages@v6
+      with:
+        enablement: true
+
+    - name: Verify Pages configuration
+      shell: bash
+      env:
+        PAGES_OUTCOME: ${{ steps.pages.outcome }}
+        PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+      run: |
+        # configure-pages succeeded and returned a base URL — all good.
+        if [ "$PAGES_OUTCOME" = "success" ] && [ -n "$PAGES_BASE_URL" ]; then
+          echo "✅ GitHub Pages is configured (base URL: $PAGES_BASE_URL)"
+          exit 0
+        fi
+
+        echo "❌ Could not configure GitHub Pages for this repository."
+        echo ""
+        echo "This action tried to enable Pages automatically but the request"
+        echo "did not succeed. The two common causes are:"
+        echo ""
+        echo "  1. Missing permissions. The workflow token needs:"
+        echo "       permissions:"
+        echo "         contents: read"
+        echo "         pages: write"
+        echo "         id-token: write"
+        echo "     Add that block to your workflow (or job) and re-run."
+        echo ""
+        echo "  2. Pages is disabled / restricted for the repo or org, so it"
+        echo "     cannot be enabled from a workflow. Enable it manually:"
+        echo "       Settings → Pages → Build and deployment →"
+        echo "       Source: \"GitHub Actions\""
+        echo ""
+        echo "Once either is in place, re-run this workflow."
+        exit 1
 
     - name: Build Starlight Site
       id: build
