@@ -22,6 +22,10 @@ inputs:
     description: 'Base path for GitHub Pages deployment (auto-detected if not set)'
     required: false
     default: ''
+  custom-domain:
+    description: 'Custom domain the site is served from (e.g. docs.example.com). Builds for the domain root and uses it for canonical URLs. The domain must also be configured in repository Settings > Pages.'
+    required: false
+    default: ''
   favicon:
     description: 'Path to custom favicon file'
     required: false
@@ -106,6 +110,7 @@ runs:
         CONTENT_DIR: ${{ inputs.content-dir }}
         SITE_DESCRIPTION: ${{ inputs.site-description }}
         BASE_PATH: ${{ inputs.base-path }}
+        CUSTOM_DOMAIN: ${{ inputs.custom-domain }}
         FAVICON: ${{ inputs.favicon }}
         LOGO: ${{ inputs.logo }}
         CHANGELOG: ${{ inputs.changelog }}
@@ -136,8 +141,19 @@ runs:
         CONTENT_DIR="${CONTENT_DIR:-docs}"
         SITE_DESCRIPTION="${SITE_DESCRIPTION:-Documentation site built with Starlight}"
 
-        # Use configure-pages output for base path if not explicitly set
-        if [ -z "$BASE_PATH" ]; then
+        # Custom domain: validate and serve from the domain root
+        # (CNAME files are ignored for workflow deploys - the domain must be set in Settings > Pages)
+        if [ -n "$CUSTOM_DOMAIN" ]; then
+          CUSTOM_DOMAIN="${CUSTOM_DOMAIN#https://}"
+          CUSTOM_DOMAIN="${CUSTOM_DOMAIN#http://}"
+          CUSTOM_DOMAIN="${CUSTOM_DOMAIN%%/*}"
+          if ! echo "$CUSTOM_DOMAIN" | grep -qE '^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$'; then
+            echo "❌ Error: custom-domain is not a valid domain name"
+            exit 1
+          fi
+          BASE_PATH=""
+        elif [ -z "$BASE_PATH" ]; then
+          # Use configure-pages output for base path if not explicitly set
           BASE_PATH="$PAGES_BASE_PATH"
         fi
 
@@ -146,6 +162,9 @@ runs:
         echo "   Content directory: $CONTENT_DIR"
         echo "   Base URL: $PAGES_BASE_URL"
         echo "   Base path: $BASE_PATH"
+        if [ -n "$CUSTOM_DOMAIN" ]; then
+          echo "   Custom domain: $CUSTOM_DOMAIN"
+        fi
 
         # Validate content directory exists
         if [ ! -d "$CONTENT_DIR" ]; then
@@ -251,6 +270,9 @@ runs:
 
         # Astro configuration
         SITE_URL="${PAGES_BASE_URL:-$GITHUB_REPO_URL}"
+        if [ -n "$CUSTOM_DOMAIN" ]; then
+          SITE_URL="https://$CUSTOM_DOMAIN"
+        fi
 
         if [ -f "$GITHUB_WORKSPACE/astro.config.mjs" ]; then
           echo "⚙️  Using astro.config.mjs from repository..."

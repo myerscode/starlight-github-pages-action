@@ -15,6 +15,32 @@ description: "How to set up the Starlight GitHub Pages Action in your repository
 
 This tells GitHub to deploy from workflow artifacts rather than a branch.
 
+## Custom Domains
+
+To serve your docs from a custom domain (e.g. `https://docs.example.com` instead of `https://user.github.io/repo`):
+
+1. Add a DNS record with your provider — a `CNAME` record pointing your subdomain at `<user>.github.io`, or `A`/`AAAA` records at GitHub's Pages IPs for apex domains
+2. In **Settings** > **Pages**, enter the domain under **Custom domain** and save (enable **Enforce HTTPS** once the certificate is issued)
+3. Re-run the deploy workflow
+
+The base path and site URL are read from your Pages settings at build time, so no action configuration is required: with a custom domain the site is built for the domain root, and canonical URLs, sitemaps, and social metadata all use the custom domain.
+
+To pin the domain explicitly instead of relying on detection, pass the [`custom-domain`](../configuration/#custom-domain) input:
+
+```yaml
+- uses: myerscode/starlight-github-pages-action@main
+  with:
+    site-title: "My Documentation"
+    custom-domain: "docs.example.com"
+```
+
+Things to keep in mind:
+
+- The domain in **Settings** > **Pages** is what makes GitHub route traffic — the `custom-domain` input configures the build, it can't activate the domain by itself
+- The base path is baked in at build time, so adding, changing, or removing a custom domain requires a re-deploy — until then internal links point at the old path
+- Don't set the `base-path` input alongside a custom domain — GitHub Pages always serves custom domains from the root, so an explicit base path would break links and assets
+- A `CNAME` file is not needed: GitHub ignores it for workflow-based deployments (it only applies to branch publishing)
+
 ## Create the Workflow
 
 Create `.github/workflows/deploy-docs.yml`:

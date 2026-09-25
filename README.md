@@ -84,7 +84,8 @@ That's it! Your documentation will be automatically built and deployed to GitHub
 | `site-title` | Title for the documentation site | Yes | — |
 | `content-dir` | Directory containing documentation content | No | `docs` |
 | `site-description` | Description for SEO and metadata | No | `Documentation site built with Starlight` |
-| `base-path` | Base path for GitHub Pages deployment | No | — |
+| `base-path` | Base path for GitHub Pages deployment (auto-detected if not set, including custom domains) | No | auto |
+| `custom-domain` | Custom domain the site is served from (must also be set in Settings > Pages) | No | — |
 | `logo` | Path to custom logo file | No | — |
 | `favicon` | Path to custom favicon file | No | — |
 
@@ -147,7 +148,6 @@ Place images and other assets in your content directory. They'll be copied to `p
     site-title: "My Project Documentation"
     site-description: "Comprehensive guide for My Project"
     content-dir: "documentation"
-    base-path: "/my-project"
     logo: "assets/logo.png"
     favicon: "assets/favicon.ico"
 ```

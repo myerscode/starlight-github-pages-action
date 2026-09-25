@@ -11,6 +11,7 @@ description: "All configuration options for the action"
 | [`content-dir`](#content-directory) | Directory containing your Markdown files | No | `docs` |
 | [`site-description`](#site-description) | Description for SEO and metadata | No | `Documentation site built with Starlight` |
 | [`base-path`](#base-path) | Base path for deployment (auto-detected) | No | auto |
+| [`custom-domain`](#custom-domain) | Custom domain the site is served from | No | — |
 | [`logo`](#logos) | Path to a custom logo file | No | auto-detected |
 | [`favicon`](#favicon) | Path to a custom favicon file | No | auto-detected |
 | [`changelog`](#changelog) | Include changelog in docs | No | `auto` |
@@ -55,12 +56,23 @@ with:
 
 ## Base Path
 
-Auto-detected from GitHub Pages. Only override for custom domains with a subpath.
+Auto-detected from your GitHub Pages settings — project pages get the repository subpath (e.g. `/my-repo`), and [custom domains](../setup/#custom-domains) are served from the root automatically. Leave this unset unless you're serving the site under a subpath outside GitHub Pages (e.g. behind a reverse proxy).
 
 ```yaml
 with:
   base-path: "/custom-subpath"
 ```
+
+## Custom Domain
+
+Declares the custom domain the site is served from. The build targets the domain root (no repository subpath) and uses the domain for canonical URLs, sitemaps, and social metadata.
+
+```yaml
+with:
+  custom-domain: "docs.example.com"
+```
+
+Without this input the domain is auto-detected from your Pages settings, so it's optional — setting it makes the build independent of detection timing. The domain must still be configured in **Settings** > **Pages** (and DNS) for GitHub to serve it; see [Custom Domains](../setup/#custom-domains) for the full setup.
 
 ## Sidebar
 
