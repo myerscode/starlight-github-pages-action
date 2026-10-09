@@ -6,12 +6,12 @@
     "build": "astro build"
   },
   "dependencies": {
-    "astro": "7.2.0",
-    "@astrojs/starlight": "0.41.7",
-    "astro-icon": "1.1.5",
-    "@iconify-json/lucide": "1.2.123",
+    "astro": "7.3.7",
+    "@astrojs/starlight": "0.42.5",
+    "astro-icon": "1.2.0",
+    "@iconify-json/lucide": "1.2.141",
     "tailwindcss": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
-    "@myerscode/starlight-theme-yeti": "1.1.0"
+    "@myerscode/starlight-theme-yeti": "1.2.0"
   }
 }
