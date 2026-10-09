@@ -32,6 +32,26 @@ jobs:
           site-title: "My Project Documentation"
           site-description: "Comprehensive documentation for My Project"
           content-dir: "docs"
-          base-path: "/my-project"
           logo: "assets/logo.png"
           favicon: "assets/favicon.ico"
+          # base-path is auto-detected (including custom domains) - only set it
+          # if you serve the site under a subpath outside GitHub Pages
+          sidebar: |
+            - label: Home
+              slug: ""
+            - label: Guides
+              items:
+                - autogenerate:
+                    directory: guides
+            - label: API Reference
+              collapsed: true
+              items:
+                - autogenerate:
+                    directory: api
+          social: |
+            - label: GitHub
+              icon: github
+              href: https://github.com/myorg/myrepo
+            - label: Discord
+              icon: discord
+              href: https://discord.gg/invite

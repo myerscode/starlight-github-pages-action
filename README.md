@@ -7,7 +7,8 @@ A GitHub Action that automatically builds and deploys [Starlight](https://starli
 - **Zero Configuration** — no need to set up a Starlight project, just provide your content
 - **Automatic Navigation** — generates navigation structure from your content directory
 - **Asset Processing** — handles images, PDFs, and other static assets automatically
-- **Custom Branding** — support for custom logos, favicons, and site configuration
+- **Custom Branding** — support for custom logos, favicons, sidebar, social links, and a changelog page
+- **GitHub Pages Aware** — base path and custom domains are detected automatically
 
 ## Quick Start
 
@@ -86,8 +87,13 @@ That's it! Your documentation will be automatically built and deployed to GitHub
 | `site-description` | Description for SEO and metadata | No | `Documentation site built with Starlight` |
 | `base-path` | Base path for GitHub Pages deployment (auto-detected if not set, including custom domains) | No | auto |
 | `custom-domain` | Custom domain the site is served from (must also be set in Settings > Pages) | No | — |
-| `logo` | Path to custom logo file | No | — |
-| `favicon` | Path to custom favicon file | No | — |
+| `logo` | Path to custom logo file (auto-detects `logo.svg`, `logo-light.svg`, `logo-dark.svg` in the content dir) | No | auto |
+| `favicon` | Path to custom favicon file (auto-detects `favicon.svg`/`.ico`/`.png` in the content dir) | No | auto |
+| `changelog` | Include a changelog page: `auto` picks up `CHANGELOG.md` from the repo root, `false` disables, or a path to a file | No | `auto` |
+| `sidebar` | Sidebar navigation structure in YAML or JSON (passed through to Starlight) | No | auto-generated |
+| `social` | Social links for the header in YAML or JSON | No | GitHub link |
+
+See the [configuration guide](https://myerscode.github.io/starlight-github-pages-action/guides/configuration/) for details and the [examples](https://myerscode.github.io/starlight-github-pages-action/guides/examples/) for sidebar, social, branding, and custom domain recipes.
 
 ### Outputs
 
@@ -150,7 +156,20 @@ Place images and other assets in your content directory. They'll be copied to `p
     content-dir: "documentation"
     logo: "assets/logo.png"
     favicon: "assets/favicon.ico"
+    sidebar: |
+      - label: Home
+        slug: ""
+      - label: Guides
+        items:
+          - autogenerate:
+              directory: guides
+    social: |
+      - label: GitHub
+        icon: github
+        href: https://github.com/myorg/myrepo
 ```
+
+For a custom domain, configure it in **Settings → Pages** and (optionally) pin it with `custom-domain: "docs.example.com"` — the base path is auto-detected either way. For full control over Starlight, add an `astro.config.mjs` to your repo root; see the [examples](https://myerscode.github.io/starlight-github-pages-action/guides/examples/#with-custom-astro-config).
 
 ## Requirements
 

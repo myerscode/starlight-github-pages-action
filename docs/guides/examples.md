@@ -97,6 +97,43 @@ Or using JSON if you prefer:
       ]
 ```
 
+### Generate a group from a directory
+
+Use `autogenerate` to build a group from every page in a directory, ordered by `sidebar.order` frontmatter. Mix it with explicit entries as needed:
+
+```yaml
+- uses: myerscode/starlight-github-pages-action@main
+  with:
+    site-title: "My Docs"
+    sidebar: |
+      - label: Home
+        slug: ""
+      - label: Guides
+        items:
+          - autogenerate:
+              directory: guides
+      - label: API Reference
+        collapsed: true
+        items:
+          - autogenerate:
+              directory: api
+```
+
+`autogenerate` must sit inside `items` — the older `label` + `autogenerate` shorthand was removed in Starlight 0.39 and now fails the build with a config error. See [Starlight's sidebar guide](https://starlight.astro.build/guides/sidebar/) for every supported option (`badge`, `collapsed`, `link`, and more).
+
+## With a Custom Domain
+
+Serve the site from your own domain instead of `<user>.github.io/<repo>`. Configure the domain and DNS in **Settings** > **Pages** first (see [Custom Domains](../setup/#custom-domains)), then optionally pin it in the workflow:
+
+```yaml
+- uses: myerscode/starlight-github-pages-action@main
+  with:
+    site-title: "My Docs"
+    custom-domain: "docs.example.com"
+```
+
+The site is built for the domain root, and canonical URLs and sitemaps use the custom domain. Leave `base-path` unset.
+
 ## With Social Links
 
 Add social icons to the header:
@@ -175,6 +212,9 @@ import starlightThemeYeti from '@myerscode/starlight-theme-yeti';
 import { linkableGroups } from '@myerscode/starlight-theme-yeti/sidebar';
 
 export default defineConfig({
+  // Injected by the action so links resolve on GitHub Pages (project path or custom domain)
+  site: process.env.STARLIGHT_SITE,
+  base: process.env.STARLIGHT_BASE,
   vite: { plugins: [tailwindcss()] },
   integrations: [
     icon(),
@@ -200,13 +240,18 @@ export default defineConfig({
           ],
         },
       ]),
-      plugins: [starlightThemeYeti()],
+      plugins: [
+        starlightThemeYeti({
+          // Colour palette: yeti (default) | black | blue | green | orange | purple | red | yellow
+          palette: 'blue',
+        }),
+      ],
     }),
   ],
 });
 ```
 
-The theme package [`@myerscode/starlight-theme-yeti`](https://github.com/myerscode/starlight-theme-yeti) is installed in the build, so custom configs can import it directly. The `linkableGroups` helper makes group headings clickable (linking to an index page). The `[icon-set:name]` syntax adds icons.
+The theme package [`@myerscode/starlight-theme-yeti`](https://github.com/myerscode/starlight-theme-yeti) is installed in the build, so custom configs can import it directly. The `linkableGroups` helper makes group headings clickable (linking to an index page), and the `[icon-set:name]` syntax adds icons to labels. See [Theme Options](../configuration/#theme-options) for everything the plugin accepts.
 
 ## Project Structure
 

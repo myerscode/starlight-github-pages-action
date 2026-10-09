@@ -61,7 +61,7 @@ Then add Markdown files to a `docs/` directory and push. Your site will be live 
 - Prev/next pagination
 - Custom theme with icon support
 - Branded 404 page out of the box
-- Automatic base path detection for GitHub Pages
+- Automatic base path and custom domain detection for GitHub Pages
 
 ## Requirements
 

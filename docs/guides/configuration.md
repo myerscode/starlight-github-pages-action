@@ -91,7 +91,13 @@ with:
           slug: guides/setup
         - label: Configuration
           slug: guides/configuration
+    - label: API
+      items:
+        - autogenerate:
+            directory: api
 ```
+
+Entries are passed straight through to Starlight, so every option in the [sidebar reference](https://starlight.astro.build/guides/sidebar/) works — `slug`, `link`, `items`, `badge`, `collapsed`, and `autogenerate` (which must be nested inside `items`).
 
 ## Social Links
 
@@ -158,9 +164,45 @@ with:
 
 ## Custom Astro Configuration
 
-For full control, place an `astro.config.mjs` at your repository root. The action uses it instead of generating one — `site` and `base` are injected automatically.
+For full control, place an `astro.config.mjs` at your repository root. The action uses it instead of generating one. Read `process.env.STARLIGHT_SITE` and `process.env.STARLIGHT_BASE` for the `site` and `base` values so links resolve correctly on GitHub Pages:
+
+```javascript
+export default defineConfig({
+  site: process.env.STARLIGHT_SITE,
+  base: process.env.STARLIGHT_BASE,
+  // ...
+});
+```
 
 When using a custom config, the theme package [`@myerscode/starlight-theme-yeti`](https://github.com/myerscode/starlight-theme-yeti) is installed and available to import.
+
+[See a full custom config example →](../examples/#with-custom-astro-config)
+
+## Theme Options
+
+In a custom config, the theme plugin accepts an options object:
+
+```javascript
+starlightThemeYeti({
+  // Colour palette: 'yeti' (default) | 'black' | 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'yellow'
+  palette: 'blue',
+
+  // Render a Keep a Changelog file at /changelog/ with per-release badges,
+  // linked from the end of the sidebar (a string is shorthand for `{ file }`)
+  changelog: { file: './CHANGELOG.md', showInFooter: true },
+
+  // Image for the built-in 404 page, or `false` to disable the artwork
+  notFoundImage: './src/assets/not-found.svg',
+
+  // Replace or disable individual theme components
+  overrides: {
+    Footer: './src/components/MyFooter.astro',
+    Hero: false,
+  },
+})
+```
+
+Code blocks use [Expressive Code](https://expressive-code.com/) with GitHub light/dark themes. Override via Starlight's `expressiveCode` option (e.g. `expressiveCode: { themes: ['vitesse-dark', 'vitesse-light'] }`), or set `expressiveCode: false` to disable it.
 
 ## 404 Page
 
