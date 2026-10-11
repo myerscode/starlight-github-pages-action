@@ -34,6 +34,7 @@ jobs:
           content-dir: "docs"
           logo: "assets/logo.png"
           favicon: "assets/favicon.ico"
+          palette: "blue"
           # base-path is auto-detected (including custom domains) - only set it
           # if you serve the site under a subpath outside GitHub Pages
           sidebar: |

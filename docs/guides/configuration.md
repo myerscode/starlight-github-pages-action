@@ -14,7 +14,8 @@ description: "All configuration options for the action"
 | [`custom-domain`](#custom-domain) | Custom domain the site is served from | No | — |
 | [`logo`](#logos) | Path to a custom logo file | No | auto-detected |
 | [`favicon`](#favicon) | Path to a custom favicon file | No | auto-detected |
-| [`changelog`](#changelog) | Include changelog in docs | No | `auto` |
+| [`changelog`](#changelog) | Render a styled changelog page from a Markdown file | No | `auto` |
+| [`palette`](#palette) | Theme colour palette | No | `yeti` |
 | [`sidebar`](#sidebar) | Sidebar navigation structure (YAML or JSON) | No | auto-generated |
 | [`social`](#social-links) | Social links in header (YAML or JSON) | No | GitHub link |
 
@@ -118,19 +119,33 @@ with:
 
 Available icons: `github`, `discord`, `x.com`, `mastodon`, `youtube`, `twitch`, `linkedin`, `threads`, and others from [Starlight's social icons](https://starlight.astro.build/reference/configuration/#social).
 
+## Palette
+
+Picks the theme's colour palette, applied to both light and dark mode. Defaults to `yeti` (monochrome silver).
+
+```yaml
+with:
+  palette: "blue"
+```
+
+Available palettes: `yeti`, `black`, `blue`, `green`, `orange`, `purple`, `red`, `yellow`. Values are case-sensitive; an unknown palette fails the build before anything is installed.
+
 ## Changelog
 
-Auto-detects `CHANGELOG.md` from your repo root and includes it in the docs.
+Renders a changelog as a styled release-history page at `/changelog/` — each release shows its version, date, and colour-coded sections (Added, Changed, Fixed, Removed, Security, …) — and adds a link to the end of the sidebar. Files in the [Keep a Changelog](https://keepachangelog.com/) format render best; any Markdown with `## [version] - date` headings works.
 
 [See changelog examples →](../examples/#changelog)
 
 | Value | Behaviour |
 |-------|-----------|
-| `auto` (default) | Looks for `CHANGELOG.md` in repo root |
-| `false` | Disables changelog inclusion |
-| `path/to/file.md` | Uses a specific file |
+| `auto` (default) | Looks for `CHANGELOG.md` (or `changelog.md`, `CHANGELOG`, `CHANGELOG.txt`) in the repo root; silently skips if none exists |
+| `false` | No changelog page |
+| `path/to/file.md` | Uses a specific file; warns and builds without a changelog if it doesn't exist |
 
-Priority: a `changelog.md` inside your content directory always takes precedence over auto-detection.
+A changelog is never required — if no file is found, the site simply builds without the page. Two things to know:
+
+- A `changelog.md` (or `.mdx`) inside your content directory always takes precedence — it's published as a regular page instead, and the rendered version is skipped
+- The link is added to the end of the sidebar automatically. If your custom [sidebar](#sidebar) includes its own entry for it (`slug: changelog` or `link: /changelog/`), that entry's label is used for the link instead
 
 ## Logos
 

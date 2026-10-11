@@ -35,9 +35,13 @@ inputs:
     required: false
     default: ''
   changelog:
-    description: 'Include changelog in docs. Set to "false" to disable, or a path to a specific file. Defaults to auto-detecting CHANGELOG.md from repo root.'
+    description: 'Render a styled changelog page at /changelog/ (linked from the sidebar). Set to "false" to disable, or a path to a specific file. Defaults to auto-detecting CHANGELOG.md from repo root.'
     required: false
     default: 'auto'
+  palette:
+    description: 'Theme colour palette: yeti (default), black, blue, green, orange, purple, red or yellow.'
+    required: false
+    default: ''
   sidebar:
     description: 'Sidebar structure in YAML or JSON format.'
     required: false
@@ -114,6 +118,7 @@ runs:
         FAVICON: ${{ inputs.favicon }}
         LOGO: ${{ inputs.logo }}
         CHANGELOG: ${{ inputs.changelog }}
+        PALETTE: ${{ inputs.palette }}
         SIDEBAR: ${{ inputs.sidebar }}
         SOCIAL: ${{ inputs.social }}
         GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
@@ -141,6 +146,17 @@ runs:
         CONTENT_DIR="${CONTENT_DIR:-docs}"
         SITE_DESCRIPTION="${SITE_DESCRIPTION:-Documentation site built with Starlight}"
 
+        # Validate palette against the theme's presets (fail fast, before installing)
+        if [ -n "$PALETTE" ]; then
+          case "$PALETTE" in
+            yeti|black|blue|green|orange|purple|red|yellow) ;;
+            *)
+              echo "❌ Error: palette '$PALETTE' is not valid. Use one of: yeti, black, blue, green, orange, purple, red, yellow"
+              exit 1
+              ;;
+          esac
+        fi
+
         # Custom domain: validate and serve from the domain root
         # (CNAME files are ignored for workflow deploys - the domain must be set in Settings > Pages)
         if [ -n "$CUSTOM_DOMAIN" ]; then
@@ -164,6 +180,9 @@ runs:
         echo "   Base path: $BASE_PATH"
         if [ -n "$CUSTOM_DOMAIN" ]; then
           echo "   Custom domain: $CUSTOM_DOMAIN"
+        fi
+        if [ -n "$PALETTE" ]; then
+          echo "   Palette: $PALETTE"
         fi
 
         # Validate content directory exists
@@ -206,38 +225,32 @@ runs:
 
         echo "   ✓ Content copied"
 
-        # Handle changelog
+        # Handle changelog: rendered by the theme as a styled page at /changelog/
+        # (a changelog page authored in the content directory takes precedence)
+        CHANGELOG_SOURCE=""
         if [ "$CHANGELOG" != "false" ]; then
           if find "src/content/docs" -maxdepth 1 -iname "changelog*" | grep -qi .; then
-            echo "   ✓ Changelog found in content directory (using existing)"
-          else
-            CHANGELOG_SOURCE=""
-            if [ "$CHANGELOG" = "auto" ]; then
-              for name in CHANGELOG.md changelog.md CHANGELOG CHANGELOG.txt; do
-                if [ -f "$GITHUB_WORKSPACE/$name" ]; then
-                  CHANGELOG_SOURCE="$GITHUB_WORKSPACE/$name"
-                  break
-                fi
-              done
-            elif [ -f "$GITHUB_WORKSPACE/$CHANGELOG" ]; then
-              CHANGELOG_SOURCE="$GITHUB_WORKSPACE/$CHANGELOG"
-            fi
-
-            if [ -n "$CHANGELOG_SOURCE" ]; then
-              if head -1 "$CHANGELOG_SOURCE" | grep -q "^---"; then
-                cp "$CHANGELOG_SOURCE" "src/content/docs/changelog.md"
-              else
-                {
-                  echo "---"
-                  echo "title: Changelog"
-                  echo "description: Version history and release notes"
-                  echo "---"
-                  echo ""
-                  cat "$CHANGELOG_SOURCE"
-                } > "src/content/docs/changelog.md"
+            echo "   ✓ Changelog found in content directory (using existing page)"
+          elif [ "$CHANGELOG" = "auto" ]; then
+            for name in CHANGELOG.md changelog.md CHANGELOG CHANGELOG.txt; do
+              if [ -f "$GITHUB_WORKSPACE/$name" ]; then
+                CHANGELOG_SOURCE="$GITHUB_WORKSPACE/$name"
+                break
               fi
-              echo "   ✓ Changelog copied from $(basename "$CHANGELOG_SOURCE")"
-            fi
+            done
+          elif [ -f "$GITHUB_WORKSPACE/$CHANGELOG" ]; then
+            CHANGELOG_SOURCE="$GITHUB_WORKSPACE/$CHANGELOG"
+          else
+            echo "⚠️  Warning: changelog file '$CHANGELOG' not found - building without a changelog page"
+          fi
+
+          if [ -n "$CHANGELOG_SOURCE" ]; then
+            # The theme renders Markdown; copy non-.md sources so Astro can import them
+            case "$CHANGELOG_SOURCE" in
+              *.md) ;;
+              *) cp "$CHANGELOG_SOURCE" "CHANGELOG.md"; CHANGELOG_SOURCE="$PWD/CHANGELOG.md" ;;
+            esac
+            echo "   ✓ Changelog page from $(basename "$CHANGELOG_SOURCE")"
           fi
         fi
 
@@ -277,8 +290,9 @@ runs:
         if [ -f "$GITHUB_WORKSPACE/astro.config.mjs" ]; then
           echo "⚙️  Using astro.config.mjs from repository..."
           cp "$GITHUB_WORKSPACE/astro.config.mjs" astro.config.mjs
-          echo "   ✓ User config copied"
-          echo "   ℹ️  Use process.env.STARLIGHT_SITE and process.env.STARLIGHT_BASE in your config for correct paths"
+          echo "   ✓ User config copied (takes precedence over action inputs)"
+          echo "   ℹ️  Read process.env.STARLIGHT_SITE and STARLIGHT_BASE for correct paths; STARLIGHT_PALETTE and"
+          echo "      STARLIGHT_CHANGELOG are also available if you want the palette/changelog inputs applied"
         else
           echo "⚙️  Using default config template..."
         fi
@@ -288,6 +302,12 @@ runs:
         export STARLIGHT_BASE="$BASE_PATH"
         export STARLIGHT_TITLE="$SITE_TITLE"
         export STARLIGHT_DESCRIPTION="$SITE_DESCRIPTION"
+        if [ -n "$PALETTE" ]; then
+          export STARLIGHT_PALETTE="$PALETTE"
+        fi
+        if [ -n "$CHANGELOG_SOURCE" ]; then
+          export STARLIGHT_CHANGELOG="$CHANGELOG_SOURCE"
+        fi
 
         if [ -n "$FAVICON" ]; then
           export STARLIGHT_FAVICON="/$(basename "$FAVICON")"

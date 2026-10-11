@@ -59,7 +59,8 @@ Then add Markdown files to a `docs/` directory and push. Your site will be live 
 - Dark/light mode toggle
 - GitHub link in the header
 - Prev/next pagination
-- Custom theme with icon support
+- Custom theme with icon support and eight colour palettes
+- Styled changelog page rendered from your `CHANGELOG.md`
 - Branded 404 page out of the box
 - Automatic base path and custom domain detection for GitHub Pages
 

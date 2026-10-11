@@ -78,9 +78,9 @@ Define sidebar navigation using YAML:
             slug: api/endpoints
           - label: Authentication
             slug: api/auth
-      - label: Changelog
-        slug: changelog
 ```
+
+The changelog page (when enabled) is linked automatically at the end of the sidebar, so it doesn't need an entry here — though adding one (e.g. `label: Release Notes` with `slug: changelog`) lets you rename the link.
 
 Or using JSON if you prefer:
 
@@ -176,9 +176,20 @@ These are auto-detected — no extra configuration needed. Or specify explicitly
     favicon: "assets/favicon.ico"
 ```
 
+## Colour Palette
+
+Switch the theme's palette with a single input — eight presets, each covering light and dark mode:
+
+```yaml
+- uses: myerscode/starlight-github-pages-action@main
+  with:
+    site-title: "My Docs"
+    palette: "green"   # yeti (default) | black | blue | green | orange | purple | red | yellow
+```
+
 ## Changelog
 
-Auto-detected by default from `CHANGELOG.md` in your repo root:
+Rendered as a styled release-history page at `/changelog/` and linked from the sidebar. Auto-detected by default from `CHANGELOG.md` in your repo root:
 
 ```yaml
 # Auto (default) — picks up CHANGELOG.md from repo root
