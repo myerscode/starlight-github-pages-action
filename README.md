@@ -7,8 +7,9 @@ A GitHub Action that automatically builds and deploys [Starlight](https://starli
 - **Zero Configuration** — no need to set up a Starlight project, just provide your content
 - **Automatic Navigation** — generates navigation structure from your content directory
 - **Asset Processing** — handles images, PDFs, and other static assets automatically
-- **Custom Branding** — custom logos, favicons, sidebar, social links, and eight colour palettes
+- **Custom Branding** — custom logos, favicons, sidebar, social links, header navigation, and eight colour palettes
 - **Changelog Page** — renders your `CHANGELOG.md` as a styled release history, linked from the sidebar
+- **Page Actions** — optional "copy as Markdown" and "open in ChatGPT/Claude" footer links
 - **GitHub Pages Aware** — base path and custom domains are detected automatically
 
 ## Quick Start
@@ -94,6 +95,8 @@ That's it! Your documentation will be automatically built and deployed to GitHub
 | `palette` | Theme colour palette: `yeti`, `black`, `blue`, `green`, `orange`, `purple`, `red`, `yellow` | No | `yeti` |
 | `sidebar` | Sidebar navigation structure in YAML or JSON (passed through to Starlight) | No | auto-generated |
 | `social` | Social links for the header in YAML or JSON | No | GitHub link |
+| `header-links` | Navigation links in the header, in YAML or JSON | No | — |
+| `page-actions` | Footer actions: `copy-markdown`, `open-in-chatgpt`, `open-in-claude` (YAML or JSON) | No | all off |
 
 See the [configuration guide](https://myerscode.github.io/starlight-github-pages-action/guides/configuration/) for details and the [examples](https://myerscode.github.io/starlight-github-pages-action/guides/examples/) for sidebar, social, branding, and custom domain recipes.
 
@@ -170,6 +173,12 @@ Place images and other assets in your content directory. They'll be copied to `p
       - label: GitHub
         icon: github
         href: https://github.com/myorg/myrepo
+    header-links: |
+      - label: "[lucide:book-open] Guides"
+        href: /guides/
+    page-actions: |
+      copy-markdown: true
+      open-in-chatgpt: true
 ```
 
 For a custom domain, configure it in **Settings → Pages** and (optionally) pin it with `custom-domain: "docs.example.com"` — the base path is auto-detected either way. For full control over Starlight, add an `astro.config.mjs` to your repo root; see the [examples](https://myerscode.github.io/starlight-github-pages-action/guides/examples/#with-custom-astro-config).

@@ -80,7 +80,7 @@ Define sidebar navigation using YAML:
             slug: api/auth
 ```
 
-The changelog page (when enabled) is linked automatically at the end of the sidebar, so it doesn't need an entry here — though adding one (e.g. `label: Release Notes` with `slug: changelog`) lets you rename the link.
+The changelog page (when enabled) is appended to the end of the sidebar automatically, so it doesn't need an entry here — though adding one anywhere (e.g. `label: Release Notes` with `slug: changelog`) places the link there instead, keeping its position.
 
 Or using JSON if you prefer:
 
@@ -210,6 +210,35 @@ Rendered as a styled release-history page at `/changelog/` and linked from the s
     changelog: "docs/HISTORY.md"
 ```
 
+## With Header Links
+
+Add navigation links to the header, with icons:
+
+```yaml
+- uses: myerscode/starlight-github-pages-action@main
+  with:
+    site-title: "My Docs"
+    header-links: |
+      - label: "[lucide:book-open] Guides"
+        href: /guides/
+      - label: npm
+        href: https://www.npmjs.com/package/@myerscode/starlight-theme-yeti
+```
+
+## With Page Actions
+
+Add a "copy as Markdown" button and AI chat links to the page footer:
+
+```yaml
+- uses: myerscode/starlight-github-pages-action@main
+  with:
+    site-title: "My Docs"
+    page-actions: |
+      copy-markdown: true
+      open-in-chatgpt: true
+      open-in-claude: true
+```
+
 ## With Custom Astro Config
 
 For full control — custom sidebar with icons, linkable groups, plugins — add an `astro.config.mjs` to your repo root:
@@ -255,6 +284,8 @@ export default defineConfig({
         starlightThemeYeti({
           // Colour palette: yeti (default) | black | blue | green | orange | purple | red | yellow
           palette: 'blue',
+          headerLinks: [{ label: '[lucide:book-open] Guides', href: '/guides/' }],
+          pageActions: { copyMarkdown: true, openInChatGPT: true },
         }),
       ],
     }),

@@ -56,3 +56,10 @@ jobs:
             - label: Discord
               icon: discord
               href: https://discord.gg/invite
+          header-links: |
+            - label: "[lucide:book-open] Guides"
+              href: /guides/
+          page-actions: |
+            copy-markdown: true
+            open-in-chatgpt: true
+            open-in-claude: true

@@ -18,6 +18,8 @@ description: "All configuration options for the action"
 | [`palette`](#palette) | Theme colour palette | No | `yeti` |
 | [`sidebar`](#sidebar) | Sidebar navigation structure (YAML or JSON) | No | auto-generated |
 | [`social`](#social-links) | Social links in header (YAML or JSON) | No | GitHub link |
+| [`header-links`](#header-links) | Navigation links in the header (YAML or JSON) | No | — |
+| [`page-actions`](#page-actions) | Footer page actions: copy-as-markdown, open in ChatGPT/Claude (YAML or JSON) | No | all off |
 
 ## Action Outputs
 
@@ -119,6 +121,39 @@ with:
 
 Available icons: `github`, `discord`, `x.com`, `mastodon`, `youtube`, `twitch`, `linkedin`, `threads`, and others from [Starlight's social icons](https://starlight.astro.build/reference/configuration/#social).
 
+## Header Links
+
+Accepts YAML or JSON. Adds navigation links to the header, between the site title and search. Labels support the `[icon-set:name] Text` syntax (same as the sidebar); links to an external URL (anything starting with `http://` or `https://`) open in a new tab.
+
+```yaml
+with:
+  header-links: |
+    - label: "[lucide:book-open] Guides"
+      href: /guides/
+    - label: npm
+      href: https://www.npmjs.com/package/@myerscode/starlight-theme-yeti
+```
+
+## Page Actions
+
+Adds action links to the page footer, next to the edit link. Accepts YAML or JSON with three boolean keys, all `false` by default:
+
+```yaml
+with:
+  page-actions: |
+    copy-markdown: true
+    open-in-chatgpt: true
+    open-in-claude: true
+```
+
+| Key | Behaviour |
+|-----|-----------|
+| `copy-markdown` | Adds a "Copy as Markdown" button that copies the page's raw Markdown source to the clipboard |
+| `open-in-chatgpt` | Adds an "Open in ChatGPT" link that opens the page's URL as a prompt in ChatGPT |
+| `open-in-claude` | Adds an "Open in Claude" link, same idea, for Claude |
+
+The AI actions need an absolute page URL, which requires a reachable `site-title` and site URL — both are already set by this action, so no extra configuration is needed. They won't appear if the site URL can't be resolved (for example, a very unusual custom Astro config that omits `site`).
+
 ## Palette
 
 Picks the theme's colour palette, applied to both light and dark mode. Defaults to `yeti` (monochrome silver).
@@ -145,7 +180,8 @@ Renders a changelog as a styled release-history page at `/changelog/` — each r
 A changelog is never required — if no file is found, the site simply builds without the page. Two things to know:
 
 - A `changelog.md` (or `.mdx`) inside your content directory always takes precedence — it's published as a regular page instead, and the rendered version is skipped
-- The link is added to the end of the sidebar automatically. If your custom [sidebar](#sidebar) includes its own entry for it (`slug: changelog` or `link: /changelog/`), that entry's label is used for the link instead
+- With a custom [sidebar](#sidebar), the link is appended to the end by default. Add an entry pointing at it anywhere (`slug: changelog` or `link: /changelog/`) and the theme wires that entry to the page in place, keeping its position and label — handy for putting it in a specific group or giving it a custom name like "Release Notes"
+- Without a custom sidebar (auto-generated navigation), the link appears in the page footer instead, since there's no sidebar structure to add it to
 
 ## Logos
 
@@ -208,6 +244,14 @@ starlightThemeYeti({
 
   // Image for the built-in 404 page, or `false` to disable the artwork
   notFoundImage: './src/assets/not-found.svg',
+
+  // Links shown in the header; labels support [icon-set:name] syntax
+  headerLinks: [
+    { label: '[lucide:book-open] Guides', href: '/guides/' },
+  ],
+
+  // Footer page actions — copy the page as Markdown, or open it in an AI chat
+  pageActions: { copyMarkdown: true, openInChatGPT: true, openInClaude: true },
 
   // Replace or disable individual theme components
   overrides: {

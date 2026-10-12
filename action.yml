@@ -50,6 +50,14 @@ inputs:
     description: 'Social links in YAML or JSON format.'
     required: false
     default: ''
+  header-links:
+    description: 'Navigation links shown in the header, in YAML or JSON format. Each item has a label (supports [icon-set:name] syntax) and an href; external URLs open in a new tab.'
+    required: false
+    default: ''
+  page-actions:
+    description: 'Page footer actions in YAML or JSON format. Keys: copy-markdown, open-in-chatgpt, open-in-claude (all booleans, default false). The AI actions need site-title and a reachable site URL.'
+    required: false
+    default: ''
 
 outputs:
   site-url:
@@ -121,6 +129,8 @@ runs:
         PALETTE: ${{ inputs.palette }}
         SIDEBAR: ${{ inputs.sidebar }}
         SOCIAL: ${{ inputs.social }}
+        HEADER_LINKS: ${{ inputs.header-links }}
+        PAGE_ACTIONS: ${{ inputs.page-actions }}
         GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
         PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
@@ -345,6 +355,31 @@ runs:
           fi
         elif [ -n "$GITHUB_REPO_URL" ]; then
           export STARLIGHT_SOCIAL="[{\"label\":\"GitHub\",\"icon\":\"github\",\"href\":\"$GITHUB_REPO_URL\"}]"
+        fi
+
+        if [ -n "$HEADER_LINKS" ]; then
+          if echo "$HEADER_LINKS" | grep -q '^\s*\['; then
+            export STARLIGHT_HEADER_LINKS="$HEADER_LINKS"
+          else
+            export STARLIGHT_HEADER_LINKS=$(echo "$HEADER_LINKS" | yq -o=json '.')
+          fi
+        fi
+
+        # page-actions uses kebab-case keys (consistent with other inputs);
+        # map them to the camelCase option names the theme expects.
+        if [ -n "$PAGE_ACTIONS" ]; then
+          if echo "$PAGE_ACTIONS" | grep -q '^\s*{'; then
+            PAGE_ACTIONS_JSON="$PAGE_ACTIONS"
+          else
+            PAGE_ACTIONS_JSON=$(echo "$PAGE_ACTIONS" | yq -o=json '.')
+          fi
+          export STARLIGHT_PAGE_ACTIONS=$(echo "$PAGE_ACTIONS_JSON" | yq -o=json '
+            {
+              "copyMarkdown": (.["copy-markdown"] // .copyMarkdown // false),
+              "openInChatGPT": (.["open-in-chatgpt"] // .openInChatGPT // false),
+              "openInClaude": (.["open-in-claude"] // .openInClaude // false)
+            }
+          ')
         fi
 
         # Build the site

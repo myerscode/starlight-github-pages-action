@@ -8,7 +8,7 @@ import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
 import starlightThemeYeti from '@myerscode/starlight-theme-yeti';
 
-let sidebar = process.env.STARLIGHT_SIDEBAR
+const sidebar = process.env.STARLIGHT_SIDEBAR
   ? JSON.parse(process.env.STARLIGHT_SIDEBAR)
   : undefined;
 
@@ -16,45 +16,24 @@ const social = process.env.STARLIGHT_SOCIAL
   ? JSON.parse(process.env.STARLIGHT_SOCIAL)
   : undefined;
 
-// The theme renders the changelog as a route (not a content entry) and appends
-// its own sidebar link. A user sidebar entry pointing at it would either fail
-// validation (`slug`) or duplicate the link (`link`), so lift it out and keep
-// the user's label for the theme-managed link instead.
-const changelogFile = process.env.STARLIGHT_CHANGELOG;
-let changelogLabel;
+const headerLinks = process.env.STARLIGHT_HEADER_LINKS
+  ? JSON.parse(process.env.STARLIGHT_HEADER_LINKS)
+  : undefined;
 
-const isChangelogEntry = (item) =>
-  item.slug === 'changelog' || /^\/?changelog\/?$/.test(item.link ?? '');
-
-const withoutChangelog = (items) =>
-  items.flatMap((item) => {
-    if (isChangelogEntry(item)) {
-      changelogLabel ??= item.label;
-      return [];
-    }
-    if (Array.isArray(item.items)) {
-      const items = withoutChangelog(item.items);
-      return items.length ? [{ ...item, items }] : [];
-    }
-    return [item];
-  });
-
-if (changelogFile && sidebar) {
-  sidebar = withoutChangelog(sidebar);
-}
-
-// Theme options (see https://github.com/myerscode/starlight-theme-yeti)
-// The theme can only append its changelog link to an explicit sidebar array; with
-// Starlight's auto-generated navigation (no sidebar input) it has nowhere to put
-// it, so link from the footer instead to keep the page reachable.
+// Theme options (see https://github.com/myerscode/starlight-theme-yeti).
+// The theme wires the changelog into the sidebar (or footer, if the sidebar is
+// auto-generated) and resolves `slug`/`link` entries pointing at it itself, so
+// the config here only needs to pass the file through.
 const theme = {
   ...(process.env.STARLIGHT_PALETTE && { palette: process.env.STARLIGHT_PALETTE }),
-  ...(changelogFile && {
-    changelog: {
-      file: changelogFile,
-      showInFooter: !sidebar,
-      ...(changelogLabel && { label: changelogLabel }),
-    },
+  ...(process.env.STARLIGHT_CHANGELOG && {
+    // Only needed as a footer fallback when there's no sidebar array for the
+    // theme to wire the link into; with a custom sidebar it's already linked there.
+    changelog: { file: process.env.STARLIGHT_CHANGELOG, showInFooter: !sidebar },
+  }),
+  ...(headerLinks && { headerLinks }),
+  ...(process.env.STARLIGHT_PAGE_ACTIONS && {
+    pageActions: JSON.parse(process.env.STARLIGHT_PAGE_ACTIONS),
   }),
 };
 
